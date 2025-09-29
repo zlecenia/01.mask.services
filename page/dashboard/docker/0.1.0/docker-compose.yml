@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  dashboard-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: maskservice-dashboard-backend
+    ports:
+      - "8002:8002"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  dashboard-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: maskservice-dashboard-frontend
+    ports:
+      - "3002:80"
+    depends_on:
+      - dashboard-backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  default:
+    name: maskservice-dashboard-network

@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  tests-backend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.backend
+    container_name: maskservice-tests-backend
+    ports:
+      - "8003:8003"
+    environment:
+      - ENV=development
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8003/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - tests-network
+
+  tests-frontend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.frontend
+    container_name: maskservice-tests-frontend
+    ports:
+      - "8083:80"
+    depends_on:
+      tests-backend:
+        condition: service_healthy
+    networks:
+      - tests-network
+
+networks:
+  tests-network:
+    driver: bridge
+
+volumes:
+  tests-data:

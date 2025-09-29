@@ -1,0 +1,547 @@
+/* Tests Page Styles - Migrated from TestMenuTemplate component */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.tests-screen {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    animation: vue-fade-in 0.5s ease-in-out;
+}
+
+.tests-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.tests-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: white;
+    padding: 20px 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+}
+
+.tests-header h1 {
+    margin: 0;
+    color: #333;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.back-btn {
+    padding: 8px 16px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.back-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+}
+
+.user-info {
+    color: #666;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px 16px;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.test-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.test-option {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.test-option:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.test-option.active {
+    border-color: #42b883;
+    background: #f8fffe;
+}
+
+.test-option.advanced {
+    background: linear-gradient(135deg, #fff 0%, #f8f9ff 100%);
+}
+
+.test-option.advanced::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-top: 30px solid #42b883;
+}
+
+.option-icon {
+    font-size: 2.5em;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8f9fa;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.test-option:hover .option-icon {
+    transform: scale(1.1);
+    background: #42b883;
+    color: white;
+}
+
+.option-content {
+    flex: 1;
+}
+
+.option-title {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+.option-description {
+    margin: 0;
+    color: #666;
+    font-size: 0.9em;
+    line-height: 1.4;
+}
+
+.advanced-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #42b883;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7em;
+    font-weight: 600;
+    z-index: 2;
+}
+
+/* Color variants */
+.test-option.color-blue:hover { border-color: #007bff; }
+.test-option.color-green:hover { border-color: #28a745; }
+.test-option.color-purple:hover { border-color: #6f42c1; }
+.test-option.color-orange:hover { border-color: #fd7e14; }
+
+.test-option.color-blue:hover .option-icon { background: #007bff; }
+.test-option.color-green:hover .option-icon { background: #28a745; }
+.test-option.color-purple:hover .option-icon { background: #6f42c1; }
+.test-option.color-orange:hover .option-icon { background: #fd7e14; }
+
+.export-section {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-bottom: 24px;
+}
+
+.export-section h2 {
+    margin: 0 0 20px 0;
+    color: #333;
+    font-size: 1.3em;
+}
+
+.export-formats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.export-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 16px;
+    border: 2px solid #dee2e6;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.export-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.export-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.export-btn.color-blue:hover { border-color: #007bff; }
+.export-btn.color-green:hover { border-color: #28a745; }
+.export-btn.color-purple:hover { border-color: #6f42c1; }
+.export-btn.color-red:hover { border-color: #dc3545; }
+
+.format-icon {
+    font-size: 1.8em;
+}
+
+.format-label {
+    font-weight: 600;
+    color: #333;
+}
+
+.format-desc {
+    font-size: 0.8em;
+    color: #666;
+    text-align: center;
+}
+
+.export-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.progress-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #42b883;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: modal-fade-in 0.3s ease-out;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: modal-slide-in 0.3s ease-out;
+}
+
+.wizard-modal {
+    width: 600px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #dee2e6;
+    background: #f8f9fa;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.3em;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #6c757d;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.close-btn:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.wizard-content {
+    padding: 24px;
+    min-height: 400px;
+}
+
+.wizard-progress {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.progress-step {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.progress-step.active {
+    background: #42b883;
+    color: white;
+}
+
+.progress-step.current {
+    background: #007bff;
+    transform: scale(1.1);
+}
+
+.step-content {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.step-content h3 {
+    margin: 0 0 12px 0;
+    color: #333;
+}
+
+.step-content p {
+    margin: 0 0 16px 0;
+    color: #666;
+}
+
+.step-content select,
+.step-content input,
+.step-content textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    margin-bottom: 12px;
+}
+
+.step-content label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+    font-weight: 500;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 20px 24px;
+    border-top: 1px solid #dee2e6;
+    background: #f8f9fa;
+}
+
+.btn-primary, .btn-secondary, .btn-success {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #545b62;
+}
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #1e7e34;
+}
+
+@keyframes vue-fade-in {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+@keyframes modal-fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modal-slide-in {
+    from { 
+        opacity: 0; 
+        transform: translateY(-20px) scale(0.95); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .tests-screen {
+        padding: 15px;
+    }
+    
+    .tests-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .test-options-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .test-option {
+        padding: 20px;
+    }
+    
+    .option-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 2em;
+    }
+    
+    .export-formats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .modal-content {
+        width: 95vw;
+        margin: 20px;
+    }
+    
+    .wizard-modal {
+        width: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .tests-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .test-option {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .export-formats {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-footer {
+        flex-direction: column;
+    }
+    
+    .wizard-progress {
+        gap: 8px;
+    }
+    
+    .progress-step {
+        width: 32px;
+        height: 32px;
+        font-size: 0.9em;
+    }
+}
