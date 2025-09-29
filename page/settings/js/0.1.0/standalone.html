@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UserData Module - Standalone Demo</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .demo-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .demo-controls {
+            padding: 15px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-group label {
+            font-weight: 500;
+            color: #495057;
+        }
+        select, input {
+            padding: 5px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .component-container {
+            min-height: 600px;
+            padding: 0;
+        }
+        .info-panel {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px;
+            margin-bottom: 0;
+        }
+        .info-panel h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-ok { background-color: #4caf50; }
+        .status-warning { background-color: #ff9800; }
+        .status-error { background-color: #f44336; }
+        @media (max-width: 768px) {
+            .demo-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="demo-container">
+            <div class="demo-header">
+                <h1>UserData Module</h1>
+                <p>User profile management with editing, session tracking, and data export</p>
+                <div>
+                    <span class="status-indicator status-ok"></span>
+                    <span>Module Status: {{ moduleStatus }}</span>
+                </div>
+            </div>
+            
+            <div class="demo-controls">
+                <div class="control-group">
+                    <label for="userRole">User Role:</label>
+                    <select id="userRole" v-model="currentUser.role" @change="updateUserRole">
+                        <option value="OPERATOR">Operator</option>
+                        <option value="ADMIN">Admin</option>
+                        <option value="SUPERUSER">Super User</option>
+                        <option value="SERWISANT">Serwisant</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="language">Language:</label>
+                    <select id="language" v-model="currentLanguage" @change="updateLanguage">
+                        <option value="en">English</option>
+                        <option value="pl">Polski</option>
+                        <option value="de">Deutsch</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="theme">Theme:</label>
+                    <select id="theme" v-model="currentTheme" @change="updateTheme">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <label for="username">Demo User:</label>
+                    <select id="username" v-model="selectedUser" @change="switchUser">
+                        <option v-for="user in sampleUsers" :key="user.username" :value="user">
+                            {{ user.displayName }} ({{ user.role }})
+                        </option>
+                    </select>
+                </div>
+                
+                <div class="control-group">
+                    <button @click="reloadModule" style="padding: 5px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Reload Module
+                    </button>
+                </div>
+            </div>
+            
+            <div class="component-container">
+                <div class="info-panel" v-if="showInfo">
+                    <h4>Module Information</h4>
+                    <p><strong>Version:</strong> {{ moduleInfo.version }}</p>
+                    <p><strong>Features:</strong> {{ moduleInfo.features.join(', ') }}</p>
+                    <p><strong>User:</strong> {{ currentUser.displayName || currentUser.username }} ({{ currentUser.role }})</p>
+                    <p><strong>Department:</strong> {{ currentUser.department }}</p>
+                    <p><strong>Language:</strong> {{ currentLanguage }}</p>
+                    <p><strong>Theme:</strong> {{ currentTheme }}</p>
+                </div>
+                
+                <!-- UserData Component will be mounted here -->
+                <div id="userDataMount" v-if="moduleLoaded">
+                    <component :is="userDataComponent" 
+                               :user="currentUser" 
+                               :language="currentLanguage"
+                               :theme="currentTheme"
+                               @navigate="onNavigate"
+                               @user-updated="onUserUpdated"
+                               @profile-exported="onProfileExported"
+                               @session-activity="onSessionActivity">
+                    </component>
+                </div>
+                
+                <div v-else class="loading-message" style="padding: 40px; text-align: center;">
+                    <p>Loading UserData module...</p>
+                    <div v-if="loadingError" class="error-message" style="color: #f44336; margin-top: 10px;">
+                        <strong>Error:</strong> {{ loadingError }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Event Log -->
+        <div class="demo-container" style="margin-top: 20px;" v-if="eventLog.length > 0">
+            <div class="demo-header">
+                <h3>Event Log</h3>
+                <button @click="clearEventLog" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                    Clear Log
+                </button>
+            </div>
+            <div style="padding: 15px; max-height: 300px; overflow-y: auto;">
+                <div v-for="(event, index) in eventLog" :key="index" 
+                     style="padding: 8px; margin-bottom: 5px; background: #f8f9fa; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                    <strong>{{ event.timestamp }}:</strong> {{ event.type }} - {{ event.message }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        const { createApp, ref, computed, onMounted } = Vue;
+        
+        const app = createApp({
+            setup() {
+                const moduleLoaded = ref(false);
+                const moduleStatus = ref('Loading...');
+                const loadingError = ref('');
+                const showInfo = ref(true);
+                const userDataComponent = ref(null);
+                const userDataModule = ref(null);
+                
+                // Demo controls
+                const currentUser = ref({
+                    username: 'demo_admin',
+                    displayName: 'Demo Admin',
+                    email: 'admin@1001.mask.services',
+                    role: 'ADMIN',
+                    department: 'Quality Control',
+                    isAuthenticated: true,
+                    preferences: {
+                        language: 'pl',
+                        theme: 'light',
+                        notifications: true
+                    }
+                });
+                
+                const currentLanguage = ref('pl');
+                const currentTheme = ref('light');
+                const eventLog = ref([]);
+                const selectedUser = ref(null);
+                
+                // Sample users for demo
+                const sampleUsers = ref([
+                    {
+                        username: 'operator1',
+                        displayName: 'Jan Kowalski',
+                        email: 'j.kowalski@masktronic.pl',
+                        role: 'OPERATOR',
+                        department: 'Production',
+                        isAuthenticated: true
+                    },
+                    {
+                        username: 'admin1',
+                        displayName: 'Anna Nowak',
+                        email: 'a.nowak@masktronic.pl',
+                        role: 'ADMIN',
+                        department: 'Quality Control',
+                        isAuthenticated: true
+                    },
+                    {
+                        username: 'superuser1',
+                        displayName: 'Piotr Wiśniewski',
+                        email: 'p.wisniewski@masktronic.pl',
+                        role: 'SUPERUSER',
+                        department: 'IT',
+                        isAuthenticated: true
+                    },
+                    {
+                        username: 'service1',
+                        displayName: 'Maria Zielińska',
+                        email: 'm.zielinska@masktronic.pl',
+                        role: 'SERWISANT',
+                        department: 'Service',
+                        isAuthenticated: true
+                    }
+                ]);
+                
+                // Module information
+                const moduleInfo = ref({
+                    name: 'userData',
+                    version: '0.1.0',
+                    features: ['Profile Editing', 'Session Tracking', 'Permissions Display', 'Data Export', 'Multi-language']
+                });
+                
+                // Event handlers
+                const addEvent = (type, message) => {
+                    eventLog.value.unshift({
+                        timestamp: new Date().toLocaleTimeString(),
+                        type,
+                        message
+                    });
+                    if (eventLog.value.length > 50) {
+                        eventLog.value.pop();
+                    }
+                };
+                
+                const onNavigate = (destination, language, mode) => {
+                    addEvent('NAVIGATE', `Navigation to: ${destination} (${language}, ${mode})`);
+                };
+                
+                const onUserUpdated = (updatedUser) => {
+                    addEvent('USER_UPDATED', `Profile updated for: ${updatedUser.username}`);
+                    currentUser.value = { ...currentUser.value, ...updatedUser };
+                };
+                
+                const onProfileExported = (exportData) => {
+                    addEvent('PROFILE_EXPORTED', `Profile exported for: ${exportData.username}`);
+                };
+                
+                const onSessionActivity = (sessionData) => {
+                    // Don't log every session activity to avoid spam
+                    if (sessionData.sessionDuration % 30 === 0) { // Log every 30 seconds
+                        addEvent('SESSION_ACTIVITY', `Session duration: ${Math.floor(sessionData.sessionDuration / 60)}min`);
+                    }
+                };
+                
+                const clearEventLog = () => {
+                    eventLog.value = [];
+                };
+                
+                // Module management
+                const loadModule = async () => {
+                    try {
+                        moduleStatus.value = 'Loading module...';
+                        addEvent('MODULE', 'Starting module load...');
+                        
+                        // Import the module
+                        const module = await import('./index.js');
+                        userDataModule.value = module.default;
+                        
+                        addEvent('MODULE', 'Module imported successfully');
+                        
+                        // Initialize the module
+                        await userDataModule.value.init({
+                            user: currentUser.value,
+                            language: currentLanguage.value,
+                            theme: currentTheme.value
+                        });
+                        
+                        addEvent('MODULE', 'Module initialized');
+                        
+                        // Load the component
+                        userDataComponent.value = await userDataModule.value.loadComponent();
+                        
+                        moduleLoaded.value = true;
+                        moduleStatus.value = 'Ready';
+                        
+                        addEvent('MODULE', 'Component loaded and ready');
+                        
+                    } catch (error) {
+                        console.error('Failed to load UserData module:', error);
+                        loadingError.value = error.message;
+                        moduleStatus.value = 'Error';
+                        addEvent('ERROR', `Module load failed: ${error.message}`);
+                    }
+                };
+                
+                const reloadModule = async () => {
+                    moduleLoaded.value = false;
+                    userDataComponent.value = null;
+                    loadingError.value = '';
+                    await loadModule();
+                };
+                
+                const updateUserRole = () => {
+                    addEvent('USER', `Role changed to: ${currentUser.value.role}`);
+                    if (userDataModule.value) {
+                        userDataModule.value.handle('user-role-changed', {
+                            user: currentUser.value,
+                            newRole: currentUser.value.role
+                        });
+                    }
+                };
+                
+                const updateLanguage = () => {
+                    addEvent('LANGUAGE', `Language changed to: ${currentLanguage.value}`);
+                    if (userDataModule.value) {
+                        userDataModule.value.handle('language-changed', {
+                            language: currentLanguage.value
+                        });
+                    }
+                };
+                
+                const updateTheme = () => {
+                    addEvent('THEME', `Theme changed to: ${currentTheme.value}`);
+                    currentUser.value.preferences.theme = currentTheme.value;
+                };
+                
+                const switchUser = () => {
+                    if (selectedUser.value) {
+                        currentUser.value = { ...selectedUser.value };
+                        currentLanguage.value = selectedUser.value.preferences?.language || 'pl';
+                        currentTheme.value = selectedUser.value.preferences?.theme || 'light';
+                        addEvent('USER', `Switched to user: ${selectedUser.value.displayName}`);
+                    }
+                };
+                
+                // Lifecycle
+                onMounted(() => {
+                    addEvent('DEMO', 'Standalone demo initialized');
+                    selectedUser.value = sampleUsers.value[1]; // Default to admin user
+                    loadModule();
+                });
+                
+                return {
+                    moduleLoaded,
+                    moduleStatus,
+                    loadingError,
+                    showInfo,
+                    userDataComponent,
+                    currentUser,
+                    currentLanguage,
+                    currentTheme,
+                    eventLog,
+                    sampleUsers,
+                    selectedUser,
+                    moduleInfo,
+                    onNavigate,
+                    onUserUpdated,
+                    onProfileExported,
+                    onSessionActivity,
+                    clearEventLog,
+                    reloadModule,
+                    updateUserRole,
+                    updateLanguage,
+                    updateTheme,
+                    switchUser
+                };
+            }
+        });
+        
+        app.mount('#app');
+    </script>
+</body>
+</html>

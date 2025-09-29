@@ -3,37 +3,24 @@ services:
     build:
       context: ../..
       dockerfile: docker/0.1.0/Dockerfile.backend
-    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    container_name: maskservice-tests-backend
     ports:
-      - "${BACKEND_PORT}:8003"
+      - "8105:8105"
     environment:
-      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
-      - ENV=${ENV}
+      - PYTHONUNBUFFERED=1
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8003/health')"]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
-      start_period: ${HEALTH_CHECK_START_PERIOD}
-    networks:
-      - default
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8105/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   tests-frontend:
     build:
       context: ../..
       dockerfile: docker/0.1.0/Dockerfile.frontend
-    container_name: ${COMPOSE_PROJECT_NAME}-frontend
+    container_name: maskservice-tests-frontend
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "8205:80"
     depends_on:
       tests-backend:
         condition: service_healthy
-    networks:
-      - default
-
-networks:
-  default:
-    name: ${NETWORK_NAME}
-
-volumes:
-  tests-data:

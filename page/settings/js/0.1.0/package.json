@@ -1,0 +1,13 @@
+{
+  "name": "@maskservice/settings-page",
+  "version": "0.1.0",
+  "description": "MaskService settings page",
+  "main": "settings.js",
+  "scripts": {
+    "test": "echo 'Settings page tests not implemented yet'",
+    "build": "echo 'Build complete'",
+    "dev": "python3 -m http.server 8080"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

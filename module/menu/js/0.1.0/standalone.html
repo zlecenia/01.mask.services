@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, height=400">
+    <title>pageTemplate - Standalone</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: #2c3e50;
+            color: white;
+        }
+        
+        #preview-container {
+            width: 1280px;
+            height: 400px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .pagetemplate-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .component-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 0 20px 0;
+            border-bottom: 1px solid #34495e;
+            margin-bottom: 20px;
+        }
+        
+        .component-header h2 {
+            margin: 0;
+            color: #3498db;
+        }
+        
+        .status-indicator {
+            padding: 5px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            background: #e74c3c;
+        }
+        
+        .status-indicator.online {
+            background: #27ae60;
+        }
+        
+        .component-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #bdc3c7;
+        }
+        
+        .info-card {
+            background: #34495e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card h3 {
+            margin: 0 0 15px 0;
+            color: #3498db;
+        }
+        
+        .info-card p {
+            margin: 8px 0;
+            color: #ecf0f1;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-refresh, .btn-toggle {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .btn-refresh {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-refresh:hover {
+            background: #2980b9;
+        }
+        
+        .btn-toggle {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-toggle:hover {
+            background: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div id="preview-container">
+        <div id="app"></div>
+    </div>
+    
+    <script type="module">
+        import Component from './index.js';
+        
+        (async () => {
+            try {
+                console.log('🚀 Initializing pageTemplate component...');
+                
+                await Component.init();
+                const { createApp } = Vue;
+                
+                const app = createApp({
+                    components: { 
+                        'pageTemplate': Component.component 
+                    },
+                    template: '<pageTemplate />'
+                });
+                
+                app.mount('#app');
+                console.log('✅ pageTemplate mounted successfully');
+                
+            } catch (error) {
+                console.error('❌ Failed to mount pageTemplate:', error);
+                document.getElementById('app').innerHTML = 
+                    `<div style="color: #e74c3c; padding: 20px;">
+                        <h2>❌ Component Error</h2>
+                        <p>Failed to load pageTemplate component:</p>
+                        <pre style="background: #34495e; padding: 10px; border-radius: 4px;">${error.message}</pre>
+                    </div>`;
+            }
+        })();
+    </script>
+</body>
+</html>

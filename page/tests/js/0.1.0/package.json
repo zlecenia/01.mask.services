@@ -1,50 +1,13 @@
 {
-  "name": "maskservice-tests-page",
+  "name": "@maskservice/tests-page",
   "version": "0.1.0",
-  "description": "MaskService Tests Management Page - Standalone module for test configuration, execution, and reporting",
+  "description": "MaskService tests page",
   "main": "tests.js",
   "scripts": {
-    "dev": "concurrently \"npm run serve\" \"npm run backend\"",
-    "serve": "python -m http.server 8203",
-    "backend": "cd ../../py/0.1.0 && python main.py",
-    "docker:build": "cd ../../docker/0.1.0 && docker-compose build",
-    "docker:up": "cd ../../docker/0.1.0 && docker-compose up -d",
-    "docker:down": "cd ../../docker/0.1.0 && docker-compose down",
-    "docker:logs": "cd ../../docker/0.1.0 && docker-compose logs -f",
-    "docker:test": "cd ../../docker/0.1.0 && chmod +x test-docker.sh && ./test-docker.sh",
-    "docker:clean": "cd ../../docker/0.1.0 && docker-compose down --volumes --remove-orphans",
-    "test": "echo \"Tests not implemented yet\"",
-    "test:integration": "echo \"Integration tests not implemented yet\"",
-    "test:e2e": "echo \"E2E tests not implemented yet\"",
-    "lint": "echo \"Linting not configured yet\"",
-    "format": "echo \"Formatting not configured yet\""
-  },
-  "keywords": [
-    "maskservice",
-    "tests",
-    "testing",
-    "vue",
-    "fastapi",
-    "docker",
-    "frontend",
-    "backend"
-  ],
-  "author": "MaskService Team",
-  "license": "MIT",
-  "devDependencies": {
-    "concurrently": "^8.2.2"
+    "test": "echo 'Tests page tests not implemented yet'",
+    "build": "echo 'Build complete'",
+    "dev": "python3 -m http.server 8080"
   },
   "dependencies": {},
-  "engines": {
-    "node": ">=16.0.0",
-    "python": ">=3.11.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/maskservice/01.mask.services.git"
-  },
-  "homepage": "http://localhost:8203",
-  "bugs": {
-    "url": "https://github.com/maskservice/01.mask.services/issues"
-  }
+  "devDependencies": {}
 }

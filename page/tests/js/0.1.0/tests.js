@@ -1,11 +1,58 @@
-// Migracja z: js/components/TestMenuTemplate.js
-// Standalone Vue.js tests management page for MaskService
-const { createApp, reactive, ref, computed, onMounted } = Vue;
+// Universal Vue import - works in both browser (dev server) and Node.js (tests)
+let reactive, computed, onMounted, inject;
 
-const TestsApp = {
-    name: 'TestsApp',
+if (typeof window !== 'undefined' && (typeof Vue !== 'undefined' || typeof window.Vue !== 'undefined')) {
+    // Browser environment (component dev server) - use global Vue
+    const VueGlobal = typeof Vue !== 'undefined' ? Vue : window.Vue;
+    ({ reactive, computed, onMounted, inject } = VueGlobal);
+} else {
+    // Node.js environment (tests) - create compatible mock functions
+    reactive = (obj) => obj;
+    computed = (fn) => ({ value: typeof fn === 'function' ? fn() : fn });
+    onMounted = (fn) => typeof fn === 'function' ? fn() : undefined;
+    inject = (key) => null;
     
-    setup() {
+    // Try to import Vue if available (for Vitest with jsdom)
+    if (typeof require !== 'undefined') {
+        try {
+            const vue = require('vue');
+            ({ reactive, computed, onMounted, inject } = vue);
+        } catch (error) {
+            // Mock functions already set above, continue
+        }
+    }
+}
+
+/**
+ * MASKTRONIC C20 - Test Menu Module
+ * Advanced test menu with wizard, scenarios, history and templates
+ * Migrated from TestMenuTemplate.js to modular architecture
+ */
+const TestMenu = {
+    name: 'TestMenu',
+    
+    props: {
+        user: {
+            type: Object,
+            default: () => ({ username: null, role: null, isAuthenticated: false })
+        },
+        language: {
+            type: String,
+            default: 'pl'
+        }
+    },
+    
+    emits: ['navigate', 'test-selected', 'export-data', 'test-created'],
+    
+    setup(props, { emit }) {
+        // Inject services
+        const store = inject('$store', null);
+        const securityService = inject('securityService', null);
+        const config = inject('moduleConfig', {
+            testWizard: { defaultDuration: 300 },
+            exportFormats: ['json', 'csv', 'xml']
+        });
+        
         // Reactive state
         const testState = reactive({
             selectedOption: null,
@@ -19,7 +66,7 @@ const TestsApp = {
             wizardData: {
                 step1: { deviceType: null, deviceModel: null },
                 step2: { testType: null, testStandard: null, pressureRange: null },
-                step3: { duration: 300, cycles: 1, tolerance: 5, alerts: true },
+                step3: { duration: config.testWizard?.defaultDuration || 300, cycles: 1, tolerance: 5, alerts: true },
                 step4: { name: '', description: '', saveAsTemplate: false }
             },
             
@@ -36,121 +83,154 @@ const TestsApp = {
             // Test Templates state
             templatesActive: false,
             testTemplates: [],
-            selectedTemplate: null,
-            
-            error: ''
+            selectedTemplate: null
         });
 
-        // User data from authentication
-        const user = ref({
-            username: localStorage.getItem('user') || 'Guest',
-            role: localStorage.getItem('role') || 'OPERATOR'
-        });
-
-        // Test menu options with enhanced features
+        // Enhanced test menu options with advanced features
         const testOptions = computed(() => [
             {
                 id: 'wizard',
                 icon: '🪄',
-                title: 'Kreator Testów',
-                description: 'Guided 4-step test creation process',
+                title: props.language === 'pl' ? 'Kreator Testów' : 'Test Wizard',
+                description: props.language === 'pl' ? 'Guided 4-step test creation process' : '4-step guided test setup',
                 color: 'blue',
-                advanced: true
+                advanced: true,
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'scenarios',
                 icon: '📈',
-                title: 'Własne Scenariusze',
-                description: 'Manage custom test scenarios',
+                title: props.language === 'pl' ? 'Własne Scenariusze' : 'Custom Scenarios',
+                description: props.language === 'pl' ? 'Manage custom test scenarios' : 'Create and manage test scenarios',
                 color: 'green',
-                advanced: true
+                advanced: true,
+                requiredRole: 'ADMIN'
             },
             {
                 id: 'history',
                 icon: '📅',
-                title: 'Historia Testów',
-                description: 'View previous test results',
+                title: props.language === 'pl' ? 'Historia Testów' : 'Test History',
+                description: props.language === 'pl' ? 'View previous test results' : 'Browse test execution history',
                 color: 'purple',
-                advanced: true
+                advanced: true,
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'templates',
                 icon: '📋',
-                title: 'Szablony Testów',
-                description: 'Pre-configured test templates',
+                title: props.language === 'pl' ? 'Szablony Testów' : 'Test Templates',
+                description: props.language === 'pl' ? 'Pre-configured test templates' : 'Ready-to-use test configurations',
                 color: 'orange',
-                advanced: true
+                advanced: true,
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'device',
                 icon: '🛡️',
-                title: 'Rodzaj urządzenia',
-                description: 'Wybierz rodzaj urządzenia',
-                color: 'blue'
+                title: props.language === 'pl' ? 'Rodzaj urządzenia' : 'Kind of Device',
+                description: props.language === 'pl' ? 'Wybierz rodzaj urządzenia' : 'Select device type',
+                color: 'blue',
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'type',
                 icon: '🔧',
-                title: 'Typ urządzenia',
-                description: 'Wybierz typ urządzenia',
-                color: 'green'
+                title: props.language === 'pl' ? 'Typ urządzenia' : 'Device Type',
+                description: props.language === 'pl' ? 'Wybierz typ urządzenia' : 'Select device model',
+                color: 'green',
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'test',
                 icon: '🧪',
-                title: 'Rodzaj testu',
-                description: 'Wybierz rodzaj testu',
-                color: 'purple'
+                title: props.language === 'pl' ? 'Rodzaj testu' : 'Kind of Test',
+                description: props.language === 'pl' ? 'Wybierz rodzaj testu' : 'Select test type',
+                color: 'purple',
+                requiredRole: 'OPERATOR'
             },
             {
                 id: 'flow',
                 icon: '🎯',
-                title: 'Przepływ testu',
-                description: 'Scenariusz testowy',
-                color: 'orange'
+                title: props.language === 'pl' ? 'Przepływ testu' : 'Test Flow',
+                description: props.language === 'pl' ? 'Scenariusz testowy' : 'Test scenario',
+                color: 'orange',
+                requiredRole: 'ADMIN'
             }
         ]);
 
-        // Export formats
-        const exportFormats = computed(() => [
-            {
-                id: 'json',
-                label: 'JSON',
-                icon: '📄',
-                color: 'blue',
-                description: 'JavaScript Object Notation'
-            },
-            {
-                id: 'xml',
-                label: 'XML',
-                icon: '📋',
-                color: 'green',
-                description: 'Extensible Markup Language'
-            },
-            {
-                id: 'csv',
-                label: 'CSV',
-                icon: '📊',
-                color: 'purple',
-                description: 'Comma Separated Values'
-            },
-            {
-                id: 'pdf',
-                label: 'PDF',
-                icon: '📑',
-                color: 'red',
-                description: 'Portable Document Format'
-            }
+        // Export formats from config
+        const exportFormats = computed(() => config.exportFormats || [
+            { id: 'json', label: 'JSON', icon: '📄', color: 'blue', description: 'JavaScript Object Notation' },
+            { id: 'xml', label: 'XML', icon: '📋', color: 'green', description: 'Extensible Markup Language' },
+            { id: 'csv', label: 'CSV', icon: '📊', color: 'purple', description: 'Comma Separated Values' },
+            { id: 'pdf', label: 'PDF', icon: '📑', color: 'red', description: 'Portable Document Format' }
         ]);
 
-        const pageTitle = computed(() => 'Menu Testów');
-        const exportTitle = computed(() => 'Eksport danych testowych');
+        // Device types from config
+        const deviceTypes = computed(() => config.deviceTypes || []);
+        const testTypes = computed(() => config.testTypes || []);
+        const testStandards = computed(() => config.testStandards || []);
+        const pressureRanges = computed(() => config.pressureRanges || []);
 
-        // Main methods
+        // Computed properties
+        const pageTitle = computed(() => {
+            const titleMap = {
+                pl: 'Menu Testów',
+                en: 'Test Menu',
+                de: 'Testmenü'
+            };
+            return titleMap[props.language] || 'Menu Testów';
+        });
+
+        const exportTitle = computed(() => {
+            const titleMap = {
+                pl: 'Eksport danych testowych',
+                en: 'Export Test Data',
+                de: 'Testdaten exportieren'
+            };
+            return titleMap[props.language] || 'Eksport danych testowych';
+        });
+
+        // Validation for wizard steps
+        const canProceedToNextStep = computed(() => {
+            switch (testState.wizardStep) {
+                case 1:
+                    return testState.wizardData.step1.deviceType && testState.wizardData.step1.deviceModel;
+                case 2:
+                    return testState.wizardData.step2.testType && testState.wizardData.step2.testStandard;
+                case 3:
+                    return testState.wizardData.step3.duration >= 60 && testState.wizardData.step3.cycles >= 1;
+                case 4:
+                    return testState.wizardData.step4.name.trim().length >= 3;
+                default:
+                    return false;
+            }
+        });
+
+        // Security validation
+        const hasPermission = (requiredRole) => {
+            if (!securityService) return true; // Fallback if security service not available
+            return securityService.hasRole(props.user.role, requiredRole);
+        };
+
+        // Methods
         const selectTestOption = async (option) => {
-            console.log(`🔶 Vue: Test option selected: ${option.id}`);
+            console.log(`🔶 Vue TestMenu: Test option selected: ${option.id}`);
+            
+            // Security check
+            if (!hasPermission(option.requiredRole)) {
+                console.warn(`Access denied for option ${option.id}. Required role: ${option.requiredRole}`);
+                if (securityService) {
+                    securityService.logSecurityEvent('access_denied', {
+                        resource: `test_menu_option_${option.id}`,
+                        requiredRole: option.requiredRole,
+                        userRole: props.user.role
+                    });
+                }
+                return;
+            }
+
             testState.selectedOption = option;
-            testState.error = '';
             
             // Handle advanced features
             switch (option.id) {
@@ -167,56 +247,72 @@ const TestsApp = {
                     showTestTemplates();
                     break;
                 default:
-                    // Basic test options - navigate to device selection
-                    try {
-                        // Try to communicate with backend
-                        const response = await fetch(`http://localhost:8103/api/test/start`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                option: option.id,
-                                user: user.value.username,
-                                role: user.value.role
-                            })
-                        });
-                        
-                        if (response.ok) {
-                            const result = await response.json();
-                            console.log('🔶 Vue: Test started:', result);
-                        }
-                    } catch (error) {
-                        console.log('🔶 Vue: Backend not available, using fallback');
+                    // Legacy test options - integrate with store if available
+                    if (store) {
+                        store.dispatch('tests/selectOption', option);
                     }
-                    
-                    // Navigate to device selection page
-                    setTimeout(() => {
-                        window.location.href = '/page/devices/js/0.1.0/';
-                    }, 500);
                     break;
             }
+            
+            // Audit logging
+            if (securityService) {
+                securityService.logSecurityEvent('test_option_selected', {
+                    optionId: option.id,
+                    optionTitle: option.title,
+                    user: props.user.username,
+                    timestamp: new Date().toISOString()
+                });
+            }
+            
+            // Emit event to parent
+            emit('test-selected', { option, timestamp: new Date().toISOString() });
+            
+            // Navigate after delay
+            setTimeout(() => {
+                emit('navigate', 'device-select', props.language, option.id);
+            }, 500);
         };
-
+        
         // Test Wizard Methods
         const startTestWizard = () => {
             console.log('🪄 Starting Test Wizard (4-step process)');
             testState.wizardActive = true;
             testState.wizardStep = 1;
             resetWizardData();
+            
+            if (securityService) {
+                securityService.logSecurityEvent('test_wizard_started', {
+                    user: props.user.username,
+                    timestamp: new Date().toISOString()
+                });
+            }
         };
         
         const resetWizardData = () => {
             testState.wizardData = {
                 step1: { deviceType: null, deviceModel: null },
                 step2: { testType: null, testStandard: null, pressureRange: null },
-                step3: { duration: 300, cycles: 1, tolerance: 5, alerts: true },
+                step3: { 
+                    duration: config.testWizard?.defaultDuration || 300, 
+                    cycles: 1, 
+                    tolerance: 5, 
+                    alerts: true 
+                },
                 step4: { name: '', description: '', saveAsTemplate: false }
             };
         };
         
         const nextWizardStep = () => {
-            if (testState.wizardStep < 4) {
+            if (testState.wizardStep < 4 && canProceedToNextStep.value) {
                 testState.wizardStep++;
                 console.log(`🪄 Test Wizard: Step ${testState.wizardStep}`);
+                
+                if (securityService) {
+                    securityService.logSecurityEvent('wizard_step_advanced', {
+                        step: testState.wizardStep,
+                        user: props.user.username
+                    });
+                }
             }
         };
         
@@ -230,357 +326,526 @@ const TestsApp = {
         const finishTestWizard = async () => {
             console.log('🪄 Finishing Test Wizard with data:', testState.wizardData);
             
-            // Create test configuration
-            const testConfig = {
-                id: `test_${Date.now()}`,
-                name: testState.wizardData.step4.name || 'New Test',
-                description: testState.wizardData.step4.description,
-                device: testState.wizardData.step1,
-                test: testState.wizardData.step2,
-                parameters: testState.wizardData.step3,
-                created: new Date().toISOString(),
-                status: 'configured'
-            };
-            
-            // Save as template if requested
-            if (testState.wizardData.step4.saveAsTemplate) {
-                testState.testTemplates.push({
-                    ...testConfig,
-                    isTemplate: true,
-                    templateName: testConfig.name
-                });
-                console.log('📋 Test saved as template');
+            try {
+                // Create test configuration
+                const testConfig = {
+                    id: `test_${Date.now()}`,
+                    name: testState.wizardData.step4.name || 'New Test',
+                    description: testState.wizardData.step4.description,
+                    device: testState.wizardData.step1,
+                    test: testState.wizardData.step2,
+                    parameters: testState.wizardData.step3,
+                    created: new Date().toISOString(),
+                    status: 'configured',
+                    createdBy: props.user.username
+                };
+                
+                // Save as template if requested
+                if (testState.wizardData.step4.saveAsTemplate) {
+                    const template = {
+                        ...testConfig,
+                        isTemplate: true,
+                        templateName: testConfig.name
+                    };
+                    testState.testTemplates.push(template);
+                    console.log('📋 Test saved as template');
+                    
+                    // Update store if available
+                    if (store) {
+                        store.dispatch('tests/addTemplate', template);
+                    }
+                }
+                
+                // Add to history
+                testState.testHistory.unshift(testConfig);
+                
+                // Update store if available
+                if (store) {
+                    store.dispatch('tests/addToHistory', testConfig);
+                }
+                
+                // Security logging
+                if (securityService) {
+                    securityService.logSecurityEvent('test_wizard_completed', {
+                        testId: testConfig.id,
+                        testName: testConfig.name,
+                        user: props.user.username,
+                        saveAsTemplate: testState.wizardData.step4.saveAsTemplate
+                    });
+                }
+                
+                // Close wizard
+                testState.wizardActive = false;
+                
+                // Emit test creation event
+                emit('test-created', testConfig);
+                
+                // Success message
+                const message = props.language === 'pl' ? 
+                    'Test został skonfigurowany pomyślnie!' : 
+                    'Test configured successfully!';
+                alert(message);
+                
+            } catch (error) {
+                console.error('Error finishing test wizard:', error);
+                if (securityService) {
+                    securityService.logSecurityEvent('test_wizard_error', {
+                        error: error.message,
+                        user: props.user.username
+                    });
+                }
             }
-            
-            // Add to history
-            testState.testHistory.unshift(testConfig);
-            
-            // Close wizard
-            testState.wizardActive = false;
-            
-            alert('Test został skonfigurowany pomyślnie!');
         };
         
         const cancelTestWizard = () => {
             testState.wizardActive = false;
             testState.wizardStep = 1;
             resetWizardData();
-        };
-
-        // Custom Scenarios Methods
-        const showCustomScenarios = () => {
-            console.log('📈 Showing Custom Scenarios');
-            testState.scenariosActive = true;
-            loadCustomScenarios();
+            
+            if (securityService) {
+                securityService.logSecurityEvent('test_wizard_cancelled', {
+                    user: props.user.username
+                });
+            }
         };
         
-        const loadCustomScenarios = () => {
-            // Mock data for demonstration
-            testState.customScenarios = [
-                {
-                    id: 'sc1',
-                    name: 'High Pressure Test',
-                    description: 'Test for high pressure environments',
-                    steps: ['Init', 'Pressure', 'Hold', 'Release'],
-                    duration: 600,
-                    created: '2024-01-15'
-                },
-                {
-                    id: 'sc2',
-                    name: 'Endurance Test',
-                    description: 'Long duration endurance testing',
-                    steps: ['Init', 'Cycle', 'Monitor', 'Report'],
-                    duration: 3600,
-                    created: '2024-01-10'
-                }
-            ];
+        // Custom Scenarios Methods
+        const showCustomScenarios = async () => {
+            console.log('📈 Showing Custom Scenarios');
+            testState.scenariosActive = true;
+            await loadCustomScenarios();
         };
-
+        
+        const loadCustomScenarios = async () => {
+            try {
+                // Try to load from store or API
+                if (store && store.getters['tests/customScenarios']) {
+                    testState.customScenarios = store.getters['tests/customScenarios'];
+                } else {
+                    // Mock data for demonstration
+                    testState.customScenarios = [
+                        {
+                            id: 'sc1',
+                            name: 'Pressure Test Standard',
+                            description: 'Standard pressure test with 5 cycles',
+                            device: 'RPD',
+                            testType: 'pressure',
+                            parameters: { cycles: 5, duration: 300 },
+                            created: '2024-01-15',
+                            createdBy: props.user.username
+                        },
+                        {
+                            id: 'sc2', 
+                            name: 'Extended Durability Test',
+                            description: 'Long-duration test for device validation',
+                            device: 'SCSR',
+                            testType: 'durability',
+                            parameters: { cycles: 20, duration: 1800 },
+                            created: '2024-01-10',
+                            createdBy: props.user.username
+                        }
+                    ];
+                }
+            } catch (error) {
+                console.error('Error loading custom scenarios:', error);
+                testState.customScenarios = [];
+            }
+        };
+        
+        const createNewScenario = () => {
+            // Start wizard with scenario mode
+            startTestWizard();
+            testState.wizardData.step4.saveAsTemplate = true;
+        };
+        
         // Test History Methods
-        const showTestHistory = () => {
+        const showTestHistory = async () => {
             console.log('📅 Showing Test History');
             testState.historyActive = true;
-            loadTestHistory();
+            await loadTestHistory();
         };
-
-        const loadTestHistory = () => {
-            // Mock test history data
-            testState.testHistory = [
-                {
-                    id: 'test_001',
-                    name: 'Mask Pressure Test',
-                    device: 'FFP2 Mask',
-                    result: 'PASSED',
-                    date: '2024-01-20T10:30:00Z',
-                    duration: '00:05:30'
-                },
-                {
-                    id: 'test_002',
-                    name: 'Filter Efficiency Test',
-                    device: 'FFP3 Filter',
-                    result: 'FAILED',
-                    date: '2024-01-19T14:15:00Z',
-                    duration: '00:08:45'
+        
+        const loadTestHistory = async () => {
+            try {
+                // Try to load from store
+                if (store && store.getters['tests/history']) {
+                    testState.testHistory = store.getters['tests/history'];
+                } else {
+                    // Mock historical data
+                    testState.testHistory = [
+                        {
+                            id: 'test_001',
+                            name: 'RPD Pressure Test',
+                            device: { deviceType: 'RPD', deviceModel: 'Model-A' },
+                            status: 'completed',
+                            result: 'PASS',
+                            duration: '05:23',
+                            date: '2024-01-20 14:30',
+                            createdBy: props.user.username
+                        },
+                        {
+                            id: 'test_002', 
+                            name: 'SCSR Durability Test',
+                            device: { deviceType: 'SCSR', deviceModel: 'Model-B' },
+                            status: 'completed',
+                            result: 'FAIL',
+                            duration: '12:45',
+                            date: '2024-01-19 09:15',
+                            createdBy: 'admin'
+                        },
+                        {
+                            id: 'test_003',
+                            name: 'Quick Validation Test', 
+                            device: { deviceType: 'RPD', deviceModel: 'Model-C' },
+                            status: 'in_progress',
+                            result: null,
+                            duration: null,
+                            date: '2024-01-21 11:00',
+                            createdBy: props.user.username
+                        }
+                    ];
                 }
-            ];
+            } catch (error) {
+                console.error('Error loading test history:', error);
+                testState.testHistory = [];
+            }
         };
-
+        
         // Test Templates Methods
-        const showTestTemplates = () => {
+        const showTestTemplates = async () => {
             console.log('📋 Showing Test Templates');
             testState.templatesActive = true;
-            loadTestTemplates();
+            await loadTestTemplates();
         };
-
-        const loadTestTemplates = () => {
-            // Mock template data
-            testState.testTemplates = [
-                {
-                    id: 'tmpl_001',
-                    name: 'Standard FFP2 Test',
-                    description: 'Standard testing protocol for FFP2 masks',
-                    deviceType: 'Respiratory Mask',
-                    testType: 'Pressure Test',
-                    isTemplate: true
-                },
-                {
-                    id: 'tmpl_002',
-                    name: 'Quick Filter Test',
-                    description: 'Quick efficiency test for filters',
-                    deviceType: 'Filter',
-                    testType: 'Efficiency Test',
-                    isTemplate: true
+        
+        const loadTestTemplates = async () => {
+            try {
+                // Try to load from store
+                if (store && store.getters['tests/templates']) {
+                    testState.testTemplates = store.getters['tests/templates'];
+                } else {
+                    // Mock template data
+                    testState.testTemplates = [
+                        {
+                            id: 'tpl_001',
+                            name: 'Standard RPD Test',
+                            description: 'Basic pressure test for RPD devices',
+                            device: { deviceType: 'RPD', deviceModel: 'Any' },
+                            test: { testType: 'pressure', testStandard: 'PN-EN-149' },
+                            parameters: { duration: 300, cycles: 3, tolerance: 5 },
+                            category: 'standard',
+                            popular: true
+                        },
+                        {
+                            id: 'tpl_002',
+                            name: 'SCSR Durability Test',
+                            description: 'Extended durability test for SCSR devices',
+                            device: { deviceType: 'SCSR', deviceModel: 'Any' },
+                            test: { testType: 'durability', testStandard: 'PN-EN-402' },
+                            parameters: { duration: 1800, cycles: 10, tolerance: 2 },
+                            category: 'extended',
+                            popular: false
+                        },
+                        {
+                            id: 'tpl_003',
+                            name: 'Quick Validation',
+                            description: 'Fast validation test for any device',
+                            device: { deviceType: 'Any', deviceModel: 'Any' },
+                            test: { testType: 'validation', testStandard: 'Internal' },
+                            parameters: { duration: 120, cycles: 1, tolerance: 10 },
+                            category: 'quick',
+                            popular: true
+                        }
+                    ];
                 }
-            ];
+            } catch (error) {
+                console.error('Error loading test templates:', error);
+                testState.testTemplates = [];
+            }
         };
-
-        // Export Methods
-        const startExport = (format) => {
-            console.log(`📤 Starting export in ${format.id} format`);
+        
+        const useTemplate = (template) => {
+            console.log('📋 Using template:', template.name);
+            
+            // Pre-fill wizard with template data
+            testState.wizardData = {
+                step1: { ...template.device },
+                step2: { ...template.test },
+                step3: { ...template.parameters, alerts: true },
+                step4: { 
+                    name: `${template.name} - ${new Date().toLocaleDateString()}`,
+                    description: `Based on template: ${template.description}`,
+                    saveAsTemplate: false 
+                }
+            };
+            
+            // Start wizard with pre-filled data
+            testState.templatesActive = false;
+            testState.wizardActive = true;
+            testState.wizardStep = 4; // Skip to final step for review
+            
+            if (securityService) {
+                securityService.logSecurityEvent('template_used', {
+                    templateId: template.id,
+                    templateName: template.name,
+                    user: props.user.username
+                });
+            }
+        };
+        
+        // Export functionality
+        const exportTestData = async (format) => {
+            console.log(`🔶 Vue TestMenu: Exporting test data as ${format.id}`);
+            
+            // Security validation
+            if (!hasPermission('OPERATOR')) {
+                console.warn('Access denied for export functionality');
+                return;
+            }
+            
             testState.exportInProgress = true;
             testState.exportFormat = format;
             
-            // Simulate export process
-            setTimeout(() => {
-                completeExport();
-            }, 2000);
+            try {
+                // Generate test data for export
+                const exportData = {
+                    timestamp: new Date().toISOString(),
+                    user: props.user.username,
+                    role: props.user.role,
+                    selectedOption: testState.selectedOption?.id || 'none',
+                    testHistory: testState.testHistory,
+                    customScenarios: testState.customScenarios,
+                    testTemplates: testState.testTemplates,
+                    exportFormat: format.id,
+                    language: props.language
+                };
+                
+                // Simulate export process
+                await simulateExport(exportData, format);
+                
+                // Security logging
+                if (securityService) {
+                    securityService.logSecurityEvent('data_exported', {
+                        format: format.id,
+                        user: props.user.username,
+                        dataSize: JSON.stringify(exportData).length
+                    });
+                }
+                
+                // Emit event for parent component
+                emit('export-data', { data: exportData, format });
+                
+                console.log(`✅ Vue TestMenu: Test data exported successfully as ${format.id}`);
+                
+            } catch (error) {
+                console.error(`❌ Vue TestMenu: Export failed for ${format.id}:`, error);
+                
+                if (securityService) {
+                    securityService.logSecurityEvent('export_error', {
+                        format: format.id,
+                        error: error.message,
+                        user: props.user.username
+                    });
+                }
+                
+                const errorMsg = props.language === 'pl' ? 
+                    `Eksport ${format.id} nieudany: ${error.message}` :
+                    `Export ${format.id} failed: ${error.message}`;
+                alert(errorMsg);
+            } finally {
+                testState.exportInProgress = false;
+                testState.exportFormat = null;
+            }
         };
 
-        const completeExport = () => {
-            const exportData = {
-                testHistory: testState.testHistory,
-                testTemplates: testState.testTemplates,
-                customScenarios: testState.customScenarios,
-                exportDate: new Date().toISOString(),
-                format: testState.exportFormat.id
-            };
+        const simulateExport = async (data, format) => {
+            // Simulate export delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
-            // Create download link
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
+            let content = '';
+            let mimeType = format.mimeType || 'application/json';
+            let fileName = `test-data-${Date.now()}`;
             
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `maskservice_tests_${new Date().toISOString().split('T')[0]}.${testState.exportFormat.id}`;
-            link.click();
+            switch (format.id) {
+                case 'json':
+                    content = JSON.stringify(data, null, 2);
+                    fileName += '.json';
+                    break;
+                case 'xml':
+                    content = generateXMLContent(data);
+                    fileName += '.xml';
+                    break;
+                case 'csv':
+                    content = generateCSVContent(data);
+                    fileName += '.csv';
+                    break;
+                case 'pdf':
+                    content = `PDF Export - Test Data\nUser: ${data.user}\nTimestamp: ${data.timestamp}`;
+                    fileName += '.pdf';
+                    break;
+            }
             
+            // Create and trigger download
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
             URL.revokeObjectURL(url);
-            
-            testState.exportInProgress = false;
-            testState.exportFormat = null;
-            
-            alert(`Eksport ${testState.exportFormat?.label || 'danych'} zakończony pomyślnie!`);
         };
 
-        const goBack = () => {
-            window.location.href = '/page/dashboard/js/0.1.0/';
+        const generateXMLContent = (data) => {
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<testData>
+    <timestamp>${data.timestamp}</timestamp>
+    <user>${data.user}</user>
+    <role>${data.role}</role>
+    <testHistory>
+        ${data.testHistory.map(t => `<test id="${t.id}" name="${t.name}" status="${t.status}"/>`).join('\n        ')}
+    </testHistory>
+</testData>`;
         };
 
-        const closeModal = () => {
+        const generateCSVContent = (data) => {
+            const headers = ['ID', 'Name', 'Device Type', 'Status', 'Result', 'Date'];
+            const rows = data.testHistory.map(t => [
+                t.id, t.name, t.device?.deviceType || 'N/A', t.status, t.result || 'N/A', t.date
+            ]);
+            return [headers, ...rows].map(row => row.join(',')).join('\n');
+        };
+        
+        // Utility Methods
+        const closeAllModals = () => {
             testState.wizardActive = false;
             testState.scenariosActive = false;
             testState.historyActive = false;
             testState.templatesActive = false;
         };
 
+        const goBack = () => {
+            console.log('🔶 Vue TestMenu: Returning to previous screen');
+            emit('navigate', 'user-menu-screen', props.language, 'default');
+        };
+
         // Lifecycle
-        onMounted(() => {
-            console.log('🔶 Vue: TestsApp component mounted');
-            
-            // Check authentication
-            if (!user.value.username || user.value.username === 'Guest') {
-                console.log('🔶 Vue: No authentication found, redirecting to login');
-                window.location.href = '/page/login/js/0.1.0/';
-                return;
-            }
+        onMounted(async () => {
+            console.log('🔶 Vue TestMenu: Component mounted');
+            console.log(`🔶 Vue TestMenu: ${testOptions.value.length} test options available`);
             
             // Load initial data
-            loadTestHistory();
-            loadTestTemplates();
-            loadCustomScenarios();
+            try {
+                await Promise.all([
+                    loadTestHistory(),
+                    loadTestTemplates(),
+                    loadCustomScenarios()
+                ]);
+                
+                if (securityService) {
+                    securityService.logSecurityEvent('test_menu_loaded', {
+                        user: props.user.username,
+                        optionsCount: testOptions.value.length
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
         });
 
         return {
+            // Reactive state
             testState,
-            user,
+            
+            // Computed properties
             testOptions,
             exportFormats,
+            deviceTypes,
+            testTypes,
+            testStandards,
+            pressureRanges,
             pageTitle,
             exportTitle,
+            canProceedToNextStep,
+            
+            // Basic methods
             selectTestOption,
+            exportTestData,
+            goBack,
+            
+            // Test Wizard methods
             startTestWizard,
             nextWizardStep,
             prevWizardStep,
             finishTestWizard,
             cancelTestWizard,
+            resetWizardData,
+            
+            // Custom Scenarios methods
             showCustomScenarios,
+            createNewScenario,
+            loadCustomScenarios,
+            
+            // Test History methods
             showTestHistory,
+            loadTestHistory,
+            
+            // Test Templates methods
             showTestTemplates,
-            startExport,
-            goBack,
-            closeModal
+            useTemplate,
+            loadTestTemplates,
+            
+            // Utility methods
+            closeAllModals,
+            hasPermission
         };
     },
-
+    
     template: `
-        <div class="tests-screen">
-            <div class="tests-container">
-                
-                <!-- Header -->
-                <div class="tests-header">
-                    <button class="back-btn" @click="goBack">← Powrót</button>
-                    <h1>{{ pageTitle }}</h1>
-                    <div class="user-info">{{ user.username }} ({{ user.role }})</div>
-                </div>
-
-                <!-- Error Message -->
-                <div v-if="testState.error" class="error-message">
-                    {{ testState.error }}
-                </div>
-
-                <!-- Test Options Grid -->
+        <div class="test-menu-container">
+            <div v-if="!testState.wizardActive && !testState.customScenariosVisible && !testState.historyVisible && !testState.templatesVisible" class="test-menu-main">
+                <h2>🧪 Test Menu</h2>
                 <div class="test-options-grid">
-                    <div 
-                        v-for="option in testOptions" 
-                        :key="option.id"
-                        class="test-option"
-                        :class="[
-                            'color-' + option.color,
-                            { advanced: option.advanced, active: testState.selectedOption?.id === option.id }
-                        ]"
-                        @click="selectTestOption(option)"
-                    >
+                    <div v-for="option in testOptions" :key="option.id" 
+                         class="test-option-card" 
+                         @click="selectTestOption(option)">
                         <div class="option-icon">{{ option.icon }}</div>
-                        <div class="option-content">
-                            <h3 class="option-title">{{ option.title }}</h3>
-                            <p class="option-description">{{ option.description }}</p>
-                        </div>
-                        <div v-if="option.advanced" class="advanced-badge">PRO</div>
+                        <h3>{{ option.name }}</h3>
+                        <p>{{ option.description }}</p>
                     </div>
                 </div>
-
-                <!-- Export Section -->
-                <div class="export-section">
-                    <h2>{{ exportTitle }}</h2>
-                    <div class="export-formats">
-                        <button 
-                            v-for="format in exportFormats"
-                            :key="format.id"
-                            class="export-btn"
-                            :class="'color-' + format.color"
-                            @click="startExport(format)"
-                            :disabled="testState.exportInProgress"
-                        >
-                            <span class="format-icon">{{ format.icon }}</span>
-                            <span class="format-label">{{ format.label }}</span>
-                            <span class="format-desc">{{ format.description }}</span>
-                        </button>
-                    </div>
-                    <div v-if="testState.exportInProgress" class="export-progress">
-                        <div class="progress-spinner"></div>
-                        <p>Eksportowanie danych w formacie {{ testState.exportFormat?.label }}...</p>
-                    </div>
+            </div>
+            
+            <div v-if="testState.wizardActive" class="test-wizard">
+                <h2>🪄 Test Wizard - Step {{ testState.wizardStep }}/4</h2>
+                <div class="wizard-content">
+                    <!-- Wizard steps content would go here -->
+                    <p>Wizard Step {{ testState.wizardStep }} Content</p>
                 </div>
-
-                <!-- Test Wizard Modal -->
-                <div v-if="testState.wizardActive" class="modal-overlay" @click="closeModal">
-                    <div class="modal-content wizard-modal" @click.stop>
-                        <div class="modal-header">
-                            <h2>🪄 Kreator Testów - Krok {{ testState.wizardStep }}/4</h2>
-                            <button class="close-btn" @click="cancelTestWizard">×</button>
-                        </div>
-                        
-                        <!-- Wizard Steps -->
-                        <div class="wizard-content">
-                            <div class="wizard-progress">
-                                <div 
-                                    v-for="step in 4" 
-                                    :key="step"
-                                    class="progress-step"
-                                    :class="{ active: step <= testState.wizardStep, current: step === testState.wizardStep }"
-                                >
-                                    {{ step }}
-                                </div>
-                            </div>
-                            
-                            <!-- Step Content would go here -->
-                            <div class="step-content">
-                                <div v-if="testState.wizardStep === 1">
-                                    <h3>Wybierz urządzenie</h3>
-                                    <p>Krok 1: Konfiguracja urządzenia testowego</p>
-                                    <select v-model="testState.wizardData.step1.deviceType">
-                                        <option value="">Wybierz typ urządzenia</option>
-                                        <option value="mask">Maska ochronna</option>
-                                        <option value="filter">Filtr</option>
-                                        <option value="respirator">Respirator</option>
-                                    </select>
-                                </div>
-                                
-                                <div v-if="testState.wizardStep === 2">
-                                    <h3>Rodzaj testu</h3>
-                                    <p>Krok 2: Wybór parametrów testowych</p>
-                                    <select v-model="testState.wizardData.step2.testType">
-                                        <option value="">Wybierz typ testu</option>
-                                        <option value="pressure">Test ciśnieniowy</option>
-                                        <option value="efficiency">Test skuteczności</option>
-                                        <option value="durability">Test wytrzymałości</option>
-                                    </select>
-                                </div>
-                                
-                                <div v-if="testState.wizardStep === 3">
-                                    <h3>Parametry testu</h3>
-                                    <p>Krok 3: Konfiguracja parametrów</p>
-                                    <label>Czas trwania (s): <input type="number" v-model="testState.wizardData.step3.duration" min="1"></label>
-                                    <label>Liczba cykli: <input type="number" v-model="testState.wizardData.step3.cycles" min="1"></label>
-                                    <label>Tolerancja (%): <input type="number" v-model="testState.wizardData.step3.tolerance" min="0" max="100"></label>
-                                    <label><input type="checkbox" v-model="testState.wizardData.step3.alerts"> Włącz alerty</label>
-                                </div>
-                                
-                                <div v-if="testState.wizardStep === 4">
-                                    <h3>Podsumowanie</h3>
-                                    <p>Krok 4: Zapisz konfigurację testu</p>
-                                    <label>Nazwa testu: <input type="text" v-model="testState.wizardData.step4.name" placeholder="Nowy test"></label>
-                                    <label>Opis: <textarea v-model="testState.wizardData.step4.description" placeholder="Opis testu"></textarea></label>
-                                    <label><input type="checkbox" v-model="testState.wizardData.step4.saveAsTemplate"> Zapisz jako szablon</label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="modal-footer">
-                            <button v-if="testState.wizardStep > 1" @click="prevWizardStep" class="btn-secondary">← Poprzedni</button>
-                            <button v-if="testState.wizardStep < 4" @click="nextWizardStep" class="btn-primary">Następny →</button>
-                            <button v-if="testState.wizardStep === 4" @click="finishTestWizard" class="btn-success">Zakończ test</button>
-                        </div>
-                    </div>
+                <div class="wizard-controls">
+                    <button @click="prevWizardStep" :disabled="testState.wizardStep === 1">Previous</button>
+                    <button @click="nextWizardStep" :disabled="!canProceedToNextStep">Next</button>
+                    <button @click="cancelTestWizard">Cancel</button>
                 </div>
-
-                <!-- Other Modals would be similar... -->
+            </div>
+            
+            <div v-if="testState.customScenariosVisible" class="custom-scenarios">
+                <h2>📋 Custom Test Scenarios</h2>
+                <button @click="goBack">Back to Menu</button>
+            </div>
+            
+            <div v-if="testState.historyVisible" class="test-history">
+                <h2>📊 Test History</h2>
+                <button @click="goBack">Back to Menu</button>
+            </div>
+            
+            <div v-if="testState.templatesVisible" class="test-templates">
+                <h2>📄 Test Templates</h2>
+                <button @click="goBack">Back to Menu</button>
             </div>
         </div>
     `
 };
 
-// Mount the application
-createApp(TestsApp).mount('#app');
-console.log('🔶 Vue TestsApp mounted successfully');
+export default TestMenu;

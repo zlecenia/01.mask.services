@@ -1,0 +1,26 @@
+services:
+  reports-backend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.backend
+    container_name: maskservice-reports-backend
+    ports:
+      - "8107:8107"
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8107/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  reports-frontend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.frontend
+    container_name: maskservice-reports-frontend
+    ports:
+      - "8207:80"
+    depends_on:
+      reports-backend:
+        condition: service_healthy

@@ -1,0 +1,42 @@
+# Makefile for page/devices
+COMPONENT_NAME := devices
+COMPONENT_TYPE := page
+VERSION := 0.1.0
+
+# Port configuration
+BACKEND_PORT := 8107
+FRONTEND_PORT := 8207
+
+.PHONY: help build test clean install docker-build docker-up docker-down
+
+help: ## Show help
+	@echo "Available targets for page/devices:"
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-15s %s\n", $$1, $$2}'
+
+install: ## Install dependencies
+	cd js/$(VERSION) && npm install
+
+build: ## Build component
+	@echo "Building devices..."
+	cd js/$(VERSION) && npm run build
+
+test: ## Run tests
+	@echo "Testing devices..."
+	cd js/$(VERSION) && npm test
+
+clean: ## Clean build artifacts
+	rm -rf js/$(VERSION)/node_modules
+	rm -rf js/$(VERSION)/dist
+
+
+docker-build: ## Build Docker images
+	cd docker/$(VERSION) && docker-compose build
+
+docker-up: ## Start Docker containers
+	cd docker/$(VERSION) && docker-compose up -d
+
+docker-down: ## Stop Docker containers
+	cd docker/$(VERSION) && docker-compose down
+
+dev: ## Start development server
+	cd docker/$(VERSION) && docker-compose up

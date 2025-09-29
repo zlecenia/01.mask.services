@@ -3,35 +3,24 @@ services:
     build:
       context: ../..
       dockerfile: docker/0.1.0/Dockerfile.backend
-    container_name: ${COMPOSE_PROJECT_NAME}-backend
+    container_name: maskservice-dashboard-backend
     ports:
-      - "${BACKEND_PORT}:8002"
+      - "8109:8109"
     environment:
-      - PYTHONUNBUFFERED=${PYTHONUNBUFFERED}
-      - ENV=${ENV}
+      - PYTHONUNBUFFERED=1
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8002/health')"]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
-      start_period: ${HEALTH_CHECK_START_PERIOD}
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8109/health')"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
   dashboard-frontend:
     build:
       context: ../..
       dockerfile: docker/0.1.0/Dockerfile.frontend
-    container_name: ${COMPOSE_PROJECT_NAME}-frontend
+    container_name: maskservice-dashboard-frontend
     ports:
-      - "${FRONTEND_PORT}:80"
+      - "8209:80"
     depends_on:
       dashboard-backend:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
-      interval: ${HEALTH_CHECK_INTERVAL}
-      timeout: ${HEALTH_CHECK_TIMEOUT}
-      retries: ${HEALTH_CHECK_RETRIES}
-
-networks:
-  default:
-    name: ${NETWORK_NAME}

@@ -1,0 +1,13 @@
+{
+  "name": "@maskservice/header-module",
+  "version": "0.1.0",
+  "description": "MaskService header module",
+  "main": "header.js",
+  "scripts": {
+    "test": "echo 'Header module tests not implemented yet'",
+    "build": "echo 'Build complete'",
+    "dev": "python3 -m http.server 8080"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1280, height=400">
+    <title>workshop - Standalone</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; }
+        #preview-container {
+            width: 1280px;
+            height: 400px;
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .workshop-container {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="preview-container">
+        <div id="app"></div>
+    </div>
+    <script type="module">
+        import Component from './index.js';
+        
+        (async () => {
+            try {
+                await Component.init();
+                const { createApp } = Vue;
+                
+                const app = createApp({
+                    components: { 
+                        'workshop': Component.component 
+                    },
+                    template: '<workshop />'
+                });
+                
+                app.mount('#app');
+                console.log('✅ workshop mounted successfully');
+            } catch (error) {
+                console.error('❌ Failed to mount workshop:', error);
+                document.getElementById('app').innerHTML = 
+                    `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        })();
+    </script>
+</body>
+</html>

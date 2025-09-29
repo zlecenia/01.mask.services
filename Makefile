@@ -69,6 +69,9 @@ build-all: $(addprefix build-page-,$(PAGES)) ## Build all pages and modules
 test-all: $(addprefix test-page-,$(PAGES)) ## Test all components
 	@echo "$(GREEN)[TEST-ALL]$(NC) All tests completed"
 
+.PHONY: test
+test: test-all ## Alias for test-all
+
 .PHONY: docker-build-all
 docker-build-all: $(addprefix docker-build-page-,$(PAGES)) ## Build all Docker images
 	@echo "$(GREEN)[DOCKER-BUILD-ALL]$(NC) All Docker images built"

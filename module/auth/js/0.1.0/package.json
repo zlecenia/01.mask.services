@@ -1,0 +1,10 @@
+{
+  "name": "@maskservice/auth-module",
+  "version": "0.1.0",
+  "description": "MaskService authentication module",
+  "main": "auth.js",
+  "scripts": {
+    "test": "echo 'Auth module tests not implemented yet'",
+    "build": "echo 'Build complete'"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "@maskservice/workshop-page",
+  "version": "0.1.0",
+  "description": "MaskService workshop page",
+  "main": "workshop.js",
+  "scripts": {
+    "test": "echo 'Workshop page tests not implemented yet'",
+    "build": "echo 'Build complete'",
+    "dev": "python3 -m http.server 8080"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

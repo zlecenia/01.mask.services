@@ -1,0 +1,13 @@
+{
+  "name": "@maskservice/devices-page",
+  "version": "0.1.0",
+  "description": "MaskService devices page",
+  "main": "devices.js",
+  "scripts": {
+    "test": "echo 'Devices page tests not implemented yet'",
+    "build": "echo 'Build complete'",
+    "dev": "python3 -m http.server 8080"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
