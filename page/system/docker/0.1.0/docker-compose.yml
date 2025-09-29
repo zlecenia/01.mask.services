@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  system-backend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.backend
+    container_name: maskservice-system-backend
+    ports:
+      - "8004:8004"
+    environment:
+      - ENV=development
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8004/')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - system-network
+
+  system-frontend:
+    build:
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.frontend
+    container_name: maskservice-system-frontend
+    ports:
+      - "8084:80"
+    depends_on:
+      system-backend:
+        condition: service_healthy
+    networks:
+      - system-network
+
+networks:
+  system-network:
+    driver: bridge
+
+volumes:
+  system-data:

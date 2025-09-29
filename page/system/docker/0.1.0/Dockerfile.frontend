@@ -1,4 +1,4 @@
-# Frontend Dockerfile for tests page
+# Frontend Dockerfile for system page
 FROM nginx:alpine
 
 # Copy custom nginx configuration
