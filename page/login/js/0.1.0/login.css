@@ -1,0 +1,275 @@
+/* Login Page Styles - Migrated from LoginScreen component */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    animation: vue-fade-in 0.5s ease-in-out;
+}
+
+.login-container {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.login-header h1 {
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 1.8em;
+}
+
+.login-header p {
+    color: #666;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+
+.vue-badge {
+    background: #42b883;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7em;
+    margin-left: 8px;
+}
+
+.login-methods {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin: 25px 0;
+}
+
+.login-method-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px 20px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    flex: 1;
+    max-width: 120px;
+}
+
+.login-method-btn:hover {
+    border-color: #42b883;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.login-method-btn .icon-scanner,
+.login-method-btn .icon-keyboard {
+    font-size: 1.5em;
+}
+
+.role-selection {
+    margin: 30px 0;
+}
+
+.role-selection h3 {
+    color: #333;
+    margin-bottom: 15px;
+    font-size: 1.1em;
+}
+
+.role-buttons {
+    display: grid;
+    gap: 12px;
+}
+
+.role-btn {
+    padding: 12px 20px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.role-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.role-btn.active {
+    border-color: #42b883;
+    background: #42b883;
+    color: white;
+}
+
+.role-btn.role-blue:hover:not(.active) { border-color: #3498db; }
+.role-btn.role-green:hover:not(.active) { border-color: #27ae60; }
+.role-btn.role-purple:hover:not(.active) { border-color: #9b59b6; }
+.role-btn.role-orange:hover:not(.active) { border-color: #e67e22; }
+
+.password-section {
+    margin: 20px 0;
+}
+
+.password-input-group {
+    display: flex;
+    margin: 15px 0;
+}
+
+.password-input {
+    flex: 1;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px 0 0 6px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.password-input:focus {
+    border-color: #42b883;
+}
+
+.password-toggle {
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.password-toggle:hover {
+    background: #e9ecef;
+}
+
+.keyboard-toggle-btn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: #f8f9fa;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s;
+}
+
+.keyboard-toggle-btn:hover {
+    background: #e9ecef;
+    border-color: #42b883;
+}
+
+.keyboard-toggle-btn.active {
+    background: #42b883;
+    border-color: #42b883;
+    color: white;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 6px;
+    margin: 15px 0;
+    font-size: 0.9em;
+}
+
+.login-action {
+    margin: 25px 0;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    background: #42b883;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.login-btn:hover:not(:disabled) {
+    background: #369870;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 184, 131, 0.3);
+}
+
+.login-btn.loading {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.login-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.login-footer {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.login-footer p {
+    color: #666;
+    font-size: 0.8em;
+    margin: 4px 0;
+}
+
+@keyframes vue-fade-in {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .login-container {
+        margin: 20px;
+        padding: 30px 25px;
+    }
+    
+    .login-header h1 {
+        font-size: 1.5em;
+    }
+    
+    .login-methods {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .login-method-btn {
+        max-width: none;
+        width: 100%;
+    }
+}

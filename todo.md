@@ -1,5 +1,5 @@
-- makefile dla wszystkich procesow
-- scripts/*.sh  scripts/*.py dla skryptow uzywanych z makefile
+- makefile dla wszystkich procesow w module/*/makefile i  page/*/makefile
+- ./scripts/*.sh  ./scripts/*.py dla skryptow uzywanych z makefile
 - testowanie poszczegolnych modulow jeden po drugim
 
 
@@ -11,10 +11,6 @@ do /home/tom/github/zlecenia/01.mask.services/*/*/*/* uwzględniając wskazówki
 jak uruchamiać osobno każdy moduł w przeglądarce jako usługa?
 stworz dodatkowoe pliki jesli to koneiczne i dodaj scripts w package.json oraz zaktualizuj dokumetnacje README.md w każdym module, aby 
  po wejściu do folderu feature, np  /home/tom/github/zlecenia/01.mask.services/module/header/js/0.1.0/   uruchomienie danego rozszerzenia w przegladarce poprzez docker w celu przetetsowania /home/tom/github/zlecenia/01.mask.services/module/header/docker/0.1.0/
-
-## naprawa
-uwzględniając wskazówki migracji z pliku components.md popraw strukture plikow components w js/features/*/*
-
 
 ## selektywne uruchamianie
 zaktulaizuj dokumentacje odnosnie uruchamiania selektywnie każdego modułu jako kompletnego poprzez wywołania ze scripts w package.json, tak aby kazdy komponent działał niezaleznie i mozna go była nie tylko prztetsować przez unit tests ale rownież uruchomić niezaleznie

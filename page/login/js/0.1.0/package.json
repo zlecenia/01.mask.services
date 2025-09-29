@@ -1,0 +1,43 @@
+{
+  "name": "@maskservice/login-page",
+  "version": "0.1.0",
+  "description": "MaskService C20 - Standalone Login Page",
+  "main": "login.js",
+  "scripts": {
+    "dev": "python3 -m http.server 3001",
+    "dev:backend": "cd ../../py/0.1.0 && python main.py",
+    "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
+    "docker:build": "cd ../../docker/0.1.0 && docker-compose build",
+    "docker:up": "cd ../../docker/0.1.0 && docker-compose up -d",
+    "docker:down": "cd ../../docker/0.1.0 && docker-compose down",
+    "docker:logs": "cd ../../docker/0.1.0 && docker-compose logs -f",
+    "test": "echo 'Login page tests not implemented yet'",
+    "validate": "echo 'Validating login page structure...' && ls -la *.js *.css *.html"
+  },
+  "keywords": [
+    "maskservice",
+    "login",
+    "vue3",
+    "authentication",
+    "c20"
+  ],
+  "author": "MaskService Team",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maskservice/01.mask.services.git",
+    "directory": "page/login"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
