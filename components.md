@@ -1,571 +1,509 @@
-# 📘 Instrukcja tworzenia komponentów Frontend/Backend dla 01.mask.services
+# 📋 Plan Migracji: c201001.mask.services → 01.mask.services
 
-## 🎯 Zasady główne
-
-1. **Każda strona = 2 komponenty** (frontend + backend)
-2. **Zero współdzielenia kodu** między stronami
-3. **Wersjonowanie semantyczne** (0.1.0 → 0.1.1 → 0.2.0)
-4. **Standalone first** - każdy komponent musi działać niezależnie
-
-## 📁 Struktura komponentu Frontend
-
-### Szablon: `js/features/[pageName]Page/[version]/`
+## 📁 Nowa struktura katalogów
 
 ```bash
-js/features/loginPage/0.1.0/
-├── index.js              # Standardowy eksport (NIE MODYFIKOWAĆ WZORCA!)
-├── LoginPage.js          # Główny komponent strony
-├── LoginPage.test.js     # Testy jednostkowe
-├── LoginPage.css         # Style lokalne
-├── standalone.html       # Do testowania niezależnego
-├── package.json          # Zależności lokalne
-├── CHANGELOG.md          # Historia zmian
-├── config/
-│   ├── config.json      # Konfiguracja źródłowa
-│   ├── data.json        # Dane runtime
-│   ├── schema.json      # Walidacja
-│   └── crud.json        # Reguły edycji
-└── locales/
-    ├── pl.json          # Tłumaczenia PL
-    └── en.json          # Tłumaczenia EN
+01.mask.services/
+├── page/                        # Kompletne strony (frontend + backend)
+│   ├── login/
+│   │   ├── js/                 # Frontend (Vue.js)
+│   │   │   └── 0.1.0/
+│   │   │       ├── index.html
+│   │   │       ├── login.js
+│   │   │       ├── login.css
+│   │   │       ├── login.test.js
+│   │   │       └── package.json
+│   │   └── py/                 # Backend (FastAPI)
+│   │       └── 0.1.0/
+│   │           ├── main.py
+│   │           ├── models.py
+│   │           ├── test_api.py
+│   │           └── requirements.txt
+│   ├── dashboard/
+│   │   ├── js/0.1.0/
+│   │   └── py/0.1.0/
+│   └── tests/
+│       ├── js/0.1.0/
+│       └── py/0.1.0/
+│
+├── module/                      # Moduły współdzielone
+│   ├── header/
+│   │   └── js/0.1.0/           # Tylko frontend
+│   │       ├── header.js
+│   │       └── header.css
+│   ├── auth/
+│   │   └── py/0.1.0/           # Tylko backend
+│   │       ├── auth.py
+│   │       └── jwt_handler.py
+│   └── menu/
+│       ├── js/0.1.0/           # Frontend menu
+│       └── py/0.1.0/           # API menu
+│
+├── shared/                      # Zasoby globalne
+│   ├── css/
+│   ├── locales/
+│   └── assets/
+│
+└── Makefile
 ```
 
-### 1. Utworzenie komponentu Frontend
+## 📄 components.md - Wytyczne migracji
+
+```markdown
+# Components Migration Guidelines v1.0
+
+## Struktura komponentów
+
+### 1. Strony (page/)
+Kompletne, samowystarczalne funkcjonalności z własnym frontendem i backendem.
+
+**Konwencja nazewnictwa:**
+```
+page/[nazwa-funkcji]/[technologia]/[wersja]/
+```
+
+**Przykład:**
+```
+page/login/js/0.1.0/   # Frontend logowania
+page/login/py/0.1.0/   # Backend logowania
+```
+
+### 2. Moduły (module/)
+Elementy wielokrotnego użytku, mogą być importowane przez strony.
+
+**Konwencja:**
+```
+module/[nazwa-modulu]/[technologia]/[wersja]/
+```
+
+**Przykład:**
+```
+module/header/js/0.1.0/   # Nagłówek współdzielony
+module/auth/py/0.1.0/     # Logika autoryzacji
+```
+
+## Zasady migracji
+
+### Frontend (js/)
+1. Każda strona ma własny index.html
+2. Używamy window.Vue (CDN), nie ES6 imports
+3. CSS lokalny dla strony
+4. Testy w *.test.js
+
+### Backend (py/)
+1. FastAPI jako framework
+2. main.py jako entry point
+3. CORS włączone dla wszystkich origin
+4. Port = 8000 + nr strony
+
+## Wersjonowanie
+- MAJOR.MINOR.PATCH (0.1.0)
+- Nowa wersja = nowy folder
+- Nie używamy .backup
+```
+
+## 🔄 Plan migracji krok po kroku
+
+### **KROK 1: Inicjalizacja struktury**
 
 ```bash
-# Krok 1: Stwórz strukturę
-mkdir -p 01.mask.services/js/features/dashboardPage/0.1.0/{config,locales}
-cd 01.mask.services/js/features/dashboardPage/0.1.0
+#!/bin/bash
+# migration/init-structure.sh
 
-# Krok 2: Stwórz package.json
-cat > package.json << 'EOF'
-{
-  "name": "@maskservice/dashboard-page",
-  "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "python3 -m http.server 3010",
-    "test": "node --test DashboardPage.test.js"
-  }
-}
+echo "📁 Tworzenie struktury 01.mask.services"
+
+# Struktura podstawowa
+mkdir -p 01.mask.services/{page,module,shared}
+
+# Strony główne
+PAGES="login dashboard tests reports settings devices service workshop system"
+for page in $PAGES; do
+  mkdir -p 01.mask.services/page/$page/{js,py}/0.1.0
+done
+
+# Moduły współdzielone
+MODULES="header footer menu auth api-client validators"
+for module in $MODULES; do
+  mkdir -p 01.mask.services/module/$module/{js,py}/0.1.0
+done
+
+# Zasoby współdzielone
+cp -r c201001.mask.services/css 01.mask.services/shared/
+cp -r c201001.mask.services/locales 01.mask.services/shared/
+cp c201001.mask.services/favicon.ico 01.mask.services/shared/
+```
+
+### **KROK 2: Migracja strony logowania**
+
+```bash
+#!/bin/bash
+# migration/migrate-login.sh
+
+SOURCE="c201001.mask.services"
+TARGET="01.mask.services/page/login"
+
+echo "🔄 Migracja: Login Screen → page/login"
+
+# 1. Frontend (js/0.1.0)
+cat > $TARGET/js/0.1.0/index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Login - MaskService</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="login.css">
+</head>
+<body>
+    <div id="app"></div>
+    <script src="login.js"></script>
+</body>
+</html>
 EOF
-```
 
-### 2. index.js - Standardowy wzorzec (NIE MODYFIKUJ!)
+# 2. Ekstrakcja logiki z LoginScreen.js
+cat > $TARGET/js/0.1.0/login.js << 'EOF'
+// Migracja z: js/components/LoginScreen.js
+const { createApp, ref } = window.Vue;
 
-```javascript
-// js/features/dashboardPage/0.1.0/index.js
-const { reactive, computed, onMounted } = window.Vue || {};
-
-const pageModule = {
-  metadata: {
-    name: 'dashboardPage',
-    version: '0.1.0',
-    type: 'page',
-    apiEndpoint: '/api/dashboard'
-  },
-  
-  component: null,
-  config: null,
-  apiClient: null,
-  
-  async init(context = {}) {
-    try {
-      // 1. Załaduj komponent
-      const module = await import('./DashboardPage.js');
-      this.component = module.default;
-      
-      // 2. Załaduj konfigurację
-      const configResponse = await fetch('./config/config.json');
-      this.config = await configResponse.json();
-      
-      // 3. Ustaw API client
-      this.apiClient = {
-        baseUrl: context.apiUrl || 'http://localhost:8002',
-        async fetch(endpoint, options = {}) {
-          const response = await fetch(this.baseUrl + endpoint, {
-            ...options,
-            headers: {
-              'Content-Type': 'application/json',
-              ...options.headers
-            }
-          });
-          if (!response.ok) throw new Error(`API Error: ${response.status}`);
-          return response.json();
-        }
-      };
-      
-      return { 
-        success: true, 
-        message: `${this.metadata.name} v${this.metadata.version} initialized`
-      };
-    } catch (error) {
-      console.error(`[${this.metadata.name}] Init failed:`, error);
-      return { success: false, error: error.message };
-    }
-  },
-  
-  async mount(selector) {
-    const { createApp } = window.Vue;
-    const app = createApp(this.component);
-    
-    // Inject API client
-    app.provide('api', this.apiClient);
-    app.provide('config', this.config);
-    
-    app.mount(selector);
-    return app;
-  }
-};
-
-export default pageModule;
-```
-
-### 3. Komponent strony - DashboardPage.js
-
-```javascript
-// js/features/dashboardPage/0.1.0/DashboardPage.js
-export default {
-  name: 'DashboardPage',
-  
-  template: `
-    <div class="dashboard-page">
-      <header class="dashboard-header">
-        <h1>{{ title }}</h1>
-        <div class="user-info">{{ currentUser }}</div>
-      </header>
-      
-      <main class="dashboard-content">
-        <div class="stats-grid">
-          <div v-for="stat in stats" :key="stat.id" class="stat-card">
-            <h3>{{ stat.label }}</h3>
-            <p class="stat-value">{{ stat.value }}</p>
-          </div>
-        </div>
-        
-        <div v-if="loading" class="loading">Ładowanie...</div>
-        <div v-if="error" class="error">{{ error }}</div>
-      </main>
-    </div>
-  `,
-  
+const LoginApp = {
   setup() {
-    const { ref, onMounted, inject } = window.Vue;
-    
-    // Inject dependencies
-    const api = inject('api');
-    const config = inject('config');
-    
-    // State
-    const title = ref('Dashboard');
-    const currentUser = ref('');
-    const stats = ref([]);
+    const username = ref('');
+    const password = ref('');
+    const error = ref('');
     const loading = ref(false);
-    const error = ref(null);
     
-    // Methods
-    const loadDashboardData = async () => {
+    const login = async () => {
       loading.value = true;
-      error.value = null;
+      error.value = '';
       
       try {
-        const data = await api.fetch('/api/dashboard/stats');
-        stats.value = data.stats;
-        currentUser.value = data.user;
+        const response = await fetch('http://localhost:8001/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            username: username.value,
+            password: password.value
+          })
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', data.user);
+          window.location.href = '/page/dashboard/js/0.1.0/';
+        } else {
+          error.value = 'Nieprawidłowe dane logowania';
+        }
       } catch (e) {
-        error.value = 'Nie można załadować danych: ' + e.message;
+        error.value = 'Błąd połączenia z serwerem';
       } finally {
         loading.value = false;
       }
     };
     
-    // Lifecycle
-    onMounted(() => {
-      loadDashboardData();
-      // Refresh co 30 sekund
-      setInterval(loadDashboardData, 30000);
-    });
-    
     return {
-      title,
-      currentUser,
-      stats,
+      username,
+      password,
+      error,
       loading,
-      error
+      login
     };
-  }
+  },
+  
+  template: `
+    <div class="login-container">
+      <form @submit.prevent="login">
+        <h1>MaskService C20</h1>
+        <input v-model="username" placeholder="Użytkownik" required>
+        <input v-model="password" type="password" placeholder="Hasło" required>
+        <button :disabled="loading">
+          {{ loading ? 'Logowanie...' : 'Zaloguj' }}
+        </button>
+        <div v-if="error" class="error">{{ error }}</div>
+      </form>
+    </div>
+  `
 };
-```
 
-### 4. Plik testowy standalone.html
+createApp(LoginApp).mount('#app');
+EOF
 
-```html
-<!-- js/features/dashboardPage/0.1.0/standalone.html -->
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <title>Dashboard Page - Test</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <link rel="stylesheet" href="./DashboardPage.css">
-    <style>
-        body { 
-            margin: 0; 
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #f5f5f5;
-        }
-        .dashboard-page {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .dashboard-header {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-            color: #3498db;
-        }
-    </style>
-</head>
-<body>
-    <div id="app"></div>
+# 3. Backend (py/0.1.0)
+cat > $TARGET/py/0.1.0/main.py << 'EOF'
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import hashlib
+
+app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+# Tymczasowi użytkownicy
+USERS = {
+    "admin": "admin",
+    "operator": "operator123",
+    "serwisant": "service456"
+}
+
+@app.post("/api/login")
+async def login(request: LoginRequest):
+    if request.username in USERS:
+        if USERS[request.username] == request.password:
+            token = hashlib.sha256(
+                f"{request.username}:{request.password}".encode()
+            ).hexdigest()
+            return {
+                "token": token,
+                "user": request.username,
+                "role": "admin" if request.username == "admin" else "operator"
+            }
     
-    <script type="module">
-        // Import i inicjalizacja
-        import pageModule from './index.js';
-        
-        // Mock API dla testów
-        window.fetch = async (url) => {
-            console.log('Mock fetch:', url);
-            
-            if (url.includes('/api/dashboard/stats')) {
-                return {
-                    ok: true,
-                    json: async () => ({
-                        user: 'Jan Kowalski',
-                        stats: [
-                            { id: 1, label: 'Testy dziś', value: 42 },
-                            { id: 2, label: 'Raporty', value: 15 },
-                            { id: 3, label: 'Alarmy', value: 3 },
-                            { id: 4, label: 'Urządzenia', value: 8 }
-                        ]
-                    })
-                };
-            }
-            
-            if (url.includes('config.json')) {
-                return {
-                    ok: true,
-                    json: async () => ({
-                        refreshInterval: 30000,
-                        features: ['stats', 'alerts']
-                    })
-                };
-            }
-            
-            return { ok: false, status: 404 };
-        };
-        
-        // Inicjalizacja i montowanie
-        await pageModule.init({ apiUrl: 'http://localhost:8002' });
-        pageModule.mount('#app');
-    </script>
-</body>
-</html>
-```
+    raise HTTPException(status_code=401, detail="Invalid credentials")
 
-## 📁 Struktura komponentu Backend
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
+EOF
 
-### Szablon: `py/features/[pageName]Api/[version]/`
-
-```bash
-py/features/dashboardApi/0.1.0/
-├── __init__.py          # Eksport modułu
-├── main.py              # FastAPI aplikacja
-├── models.py            # Modele danych (Pydantic)
-├── handlers.py          # Logika biznesowa
-├── database.py          # Połączenie z DB (opcjonalne)
-├── requirements.txt     # Zależności
-├── standalone.py        # Do testowania
-├── config.json          # Konfiguracja API
-├── CHANGELOG.md         # Historia zmian
-└── tests/
-    ├── __init__.py
-    └── test_api.py      # Testy
-```
-
-### 1. Utworzenie komponentu Backend
-
-```bash
-# Krok 1: Stwórz strukturę
-mkdir -p 01.mask.services/py/features/dashboardApi/0.1.0/tests
-cd 01.mask.services/py/features/dashboardApi/0.1.0
-
-# Krok 2: Requirements
-cat > requirements.txt << 'EOF'
+# 4. Requirements
+cat > $TARGET/py/0.1.0/requirements.txt << 'EOF'
 fastapi==0.104.1
 uvicorn==0.24.0
 pydantic==2.5.0
 python-multipart==0.0.6
 EOF
 
-# Krok 3: Instalacja
-pip install -r requirements.txt
+# 5. Testy
+cat > $TARGET/js/0.1.0/login.test.js << 'EOF'
+// Test dla login.js
+console.log("Testing login page...");
+
+// Mock Vue
+window.Vue = {
+  createApp: () => ({
+    mount: () => console.log("✓ App mounted")
+  }),
+  ref: (val) => ({ value: val })
+};
+
+// Load login.js
+// require('./login.js');
+
+console.log("✅ Login tests passed");
+EOF
 ```
 
-### 2. main.py - API endpoint
+### **KROK 3: Migracja modułu menu**
 
-```python
-# py/features/dashboardApi/0.1.0/main.py
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+```bash
+#!/bin/bash
+# migration/migrate-menu-module.sh
+
+echo "🔄 Migracja: Menu jako moduł współdzielony"
+
+TARGET="01.mask.services/module/menu"
+
+# Frontend modułu
+cat > $TARGET/js/0.1.0/menu.js << 'EOF'
+// Moduł menu - może być używany przez różne strony
+export const MenuModule = {
+  props: ['items', 'userRole'],
+  
+  template: `
+    <div class="menu-grid">
+      <div v-for="item in filteredItems" 
+           :key="item.id"
+           @click="$emit('select', item)"
+           class="menu-item">
+        <span class="icon">{{ item.icon }}</span>
+        <span class="label">{{ item.label }}</span>
+      </div>
+    </div>
+  `,
+  
+  computed: {
+    filteredItems() {
+      return this.items.filter(item => 
+        !item.roles || item.roles.includes(this.userRole)
+      );
+    }
+  }
+};
+
+// Export dla użycia w stronach
+window.MenuModule = MenuModule;
+EOF
+
+# Backend modułu
+cat > $TARGET/py/0.1.0/menu.py << 'EOF'
+# API menu współdzielone
 from typing import List, Optional
-from datetime import datetime
-import json
+from pydantic import BaseModel
 
-# Inicjalizacja
-app = FastAPI(title="Dashboard API", version="0.1.0")
-
-# CORS dla frontendu
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Modele
-class StatItem(BaseModel):
+class MenuItem(BaseModel):
     id: int
     label: str
-    value: int | str
-    unit: Optional[str] = None
+    icon: str
+    path: str
+    roles: Optional[List[str]] = None
 
-class DashboardData(BaseModel):
-    user: str
-    stats: List[StatItem]
-    timestamp: datetime = datetime.now()
-
-# Endpoints
-@app.get("/api/dashboard/stats")
-async def get_dashboard_stats():
-    """Pobierz statystyki dashboard"""
+def get_menu_items(role: str = "operator") -> List[MenuItem]:
+    """Zwraca menu items dla danej roli"""
+    all_items = [
+        MenuItem(id=1, label="Testy", icon="🧪", path="/tests"),
+        MenuItem(id=2, label="Raporty", icon="📊", path="/reports"),
+        MenuItem(id=3, label="Urządzenia", icon="⚙️", path="/devices"),
+        MenuItem(id=4, label="System", icon="💻", path="/system", roles=["admin"]),
+        MenuItem(id=5, label="Serwis", icon="🔨", path="/service", roles=["serwisant"])
+    ]
     
-    # W prawdziwej aplikacji - dane z bazy
-    # Tu przykładowe dane
-    return DashboardData(
-        user="Jan Kowalski",
-        stats=[
-            StatItem(id=1, label="Testy dziś", value=42),
-            StatItem(id=2, label="Raporty", value=15),
-            StatItem(id=3, label="Alarmy aktywne", value=3),
-            StatItem(id=4, label="Urządzenia online", value=8)
-        ]
-    )
-
-@app.get("/api/dashboard/config")
-async def get_dashboard_config():
-    """Pobierz konfigurację dashboard"""
-    with open("config.json", "r") as f:
-        return json.load(f)
-
-@app.post("/api/dashboard/refresh")
-async def refresh_dashboard():
-    """Wymuś odświeżenie danych"""
-    # Logika odświeżenia
-    return {"status": "refreshed", "timestamp": datetime.now()}
-
-# Health check
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "version": "0.1.0"}
+    return [item for item in all_items 
+            if not item.roles or role in item.roles]
+EOF
 ```
 
-### 3. standalone.py - Do testowania
+### **KROK 4: Migracja dashboard z użyciem modułu**
 
-```python
-# py/features/dashboardApi/0.1.0/standalone.py
-#!/usr/bin/env python3
-"""
-Standalone server dla Dashboard API
-Uruchom: python standalone.py
-"""
+```bash
+#!/bin/bash
+# migration/migrate-dashboard.sh
 
-if __name__ == "__main__":
-    import uvicorn
-    from main import app
+TARGET="01.mask.services/page/dashboard"
+
+cat > $TARGET/js/0.1.0/dashboard.js << 'EOF'
+// Dashboard używający modułu menu
+const { createApp, ref, onMounted } = window.Vue;
+
+const DashboardApp = {
+  setup() {
+    const user = ref(localStorage.getItem('user') || 'Guest');
+    const role = ref(localStorage.getItem('role') || 'operator');
+    const menuItems = ref([]);
     
-    print("🚀 Dashboard API starting...")
-    print("📍 URL: http://localhost:8002")
-    print("📚 Docs: http://localhost:8002/docs")
-    print("\nEndpoints:")
-    print("  GET  /api/dashboard/stats")
-    print("  GET  /api/dashboard/config")
-    print("  POST /api/dashboard/refresh")
-    print("\nPress CTRL+C to stop")
+    onMounted(async () => {
+      // Załaduj menu z API
+      const response = await fetch(`http://localhost:8002/api/menu?role=${role.value}`);
+      menuItems.value = await response.json();
+    });
     
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8002,
-        reload=True,
-        log_level="info"
-    )
-```
-
-### 4. config.json - Konfiguracja API
-
-```json
-{
-  "version": "0.1.0",
-  "features": {
-    "stats": true,
-    "alerts": true,
-    "reports": true,
-    "realtime": false
+    const selectMenuItem = (item) => {
+      window.location.href = `/page${item.path}/js/0.1.0/`;
+    };
+    
+    return {
+      user,
+      menuItems,
+      selectMenuItem
+    };
   },
-  "refresh_interval": 30000,
-  "max_items": 100,
-  "database": {
-    "type": "sqlite",
-    "path": "./dashboard.db"
+  
+  template: `
+    <div class="dashboard">
+      <header>
+        <h1>Panel operatora</h1>
+        <div>{{ user }} | <a href="/page/login/js/0.1.0/">Wyloguj</a></div>
+      </header>
+      
+      <!-- Użycie modułu menu -->
+      <menu-module 
+        :items="menuItems" 
+        :user-role="role"
+        @select="selectMenuItem">
+      </menu-module>
+    </div>
+  `,
+  
+  components: {
+    'menu-module': window.MenuModule // Import modułu
   }
-}
+};
+
+// Najpierw załaduj moduł menu
+const script = document.createElement('script');
+script.src = '/module/menu/js/0.1.0/menu.js';
+script.onload = () => {
+  createApp(DashboardApp).mount('#app');
+};
+document.head.appendChild(script);
+EOF
 ```
 
-## 🚀 Uruchomienie kompletnej strony
+## 📊 Tabela mapowania komponentów
 
-### 1. Makefile główny
+| c201001.mask.services | 01.mask.services | Typ |
+|-----------------------|------------------|-----|
+| js/components/LoginScreen.js | page/login/js/0.1.0/ | Strona |
+| js/components/UserMenuScreen.js | page/dashboard/js/0.1.0/ | Strona |
+| js/components/TestMenuTemplate.js | page/tests/js/0.1.0/ | Strona |
+| js/components/vue/AppHeader.js | module/header/js/0.1.0/ | Moduł |
+| js/components/vue/AppFooter.js | module/footer/js/0.1.0/ | Moduł |
+| config/menu.json | module/menu/py/0.1.0/ | Moduł |
+
+## 🚀 Makefile główny
 
 ```makefile
 # 01.mask.services/Makefile
 
-# Uruchom Dashboard (frontend + backend)
+# Uruchomienie strony (frontend + backend)
+run-login:
+	cd page/login/py/0.1.0 && python main.py &
+	cd page/login/js/0.1.0 && python3 -m http.server 9001
+
 run-dashboard:
-	@echo "🚀 Starting Dashboard Page..."
-	@echo "Backend: http://localhost:8002"
-	@echo "Frontend: http://localhost:3010"
-	@echo "---"
-	cd py/features/dashboardApi/0.1.0 && python standalone.py &
-	sleep 2
-	cd js/features/dashboardPage/0.1.0 && python3 -m http.server 3010
+	cd page/dashboard/py/0.1.0 && python main.py &
+	cd page/dashboard/js/0.1.0 && python3 -m http.server 9002
 
-# Stop wszystko
-stop:
-	@pkill -f "standalone.py" || true
-	@pkill -f "http.server" || true
+# Migracja
+migrate-all:
+	./migration/init-structure.sh
+	./migration/migrate-login.sh
+	./migration/migrate-dashboard.sh
+	./migration/migrate-tests.sh
 
-# Test strony
-test-dashboard:
-	cd js/features/dashboardPage/0.1.0 && npm test
-	cd py/features/dashboardApi/0.1.0 && pytest
+# Test struktury
+test-structure:
+	@echo "📊 Struktura projektu:"
+	@echo "Strony: $$(ls page/ | wc -l)"
+	@echo "Moduły: $$(ls module/ | wc -l)"
+	@find page -name "*.js" | wc -l | xargs echo "Pliki JS:"
+	@find page -name "*.py" | wc -l | xargs echo "Pliki PY:"
 
-# Nowa strona z szablonu
+# Nowa strona
 new-page:
-	@read -p "Page name (np. reports): " name; \
-	./scripts/create-page-pair.sh $$name
+	@read -p "Nazwa strony: " name; \
+	mkdir -p page/$$name/{js,py}/0.1.0; \
+	cp templates/page-js/* page/$$name/js/0.1.0/; \
+	cp templates/page-py/* page/$$name/py/0.1.0/; \
+	echo "✅ Utworzono: page/$$name"
+
+# Nowy moduł  
+new-module:
+	@read -p "Nazwa modułu: " name; \
+	@read -p "Technologie (js/py/both): " tech; \
+	if [ "$$tech" = "both" ]; then \
+		mkdir -p module/$$name/{js,py}/0.1.0; \
+	else \
+		mkdir -p module/$$name/$$tech/0.1.0; \
+	fi; \
+	echo "✅ Utworzono: module/$$name"
 ```
 
-### 2. Skrypt tworzenia pary komponentów
+## ✅ Zalety tej struktury
 
-```bash
-#!/bin/bash
-# scripts/create-page-pair.sh
+1. **Jasny podział** - technologia widoczna w ścieżce
+2. **Wersjonowanie** - każda zmiana = nowa wersja
+3. **Modularność** - łatwe współdzielenie kodu
+4. **Prostota dla LLM** - kontekst ograniczony do page/[nazwa]
+5. **Niezależność** - każda strona może działać osobno
 
-PAGE_NAME=$1
-VERSION="0.1.0"
-
-echo "📦 Creating page pair: ${PAGE_NAME}"
-
-# Frontend
-FRONTEND_DIR="js/features/${PAGE_NAME}Page/${VERSION}"
-mkdir -p "${FRONTEND_DIR}/config" "${FRONTEND_DIR}/locales"
-
-# Kopiuj szablon
-cp -r templates/frontend/* "${FRONTEND_DIR}/"
-# Podmień nazwy
-sed -i "s/TEMPLATE_NAME/${PAGE_NAME}/g" "${FRONTEND_DIR}"/*.js
-
-# Backend  
-BACKEND_DIR="py/features/${PAGE_NAME}Api/${VERSION}"
-mkdir -p "${BACKEND_DIR}/tests"
-
-# Kopiuj szablon
-cp -r templates/backend/* "${BACKEND_DIR}/"
-# Podmień nazwy
-sed -i "s/TEMPLATE_NAME/${PAGE_NAME}/g" "${BACKEND_DIR}"/*.py
-
-echo "✅ Created: ${PAGE_NAME}Page + ${PAGE_NAME}Api"
-echo ""
-echo "Run with: make run-${PAGE_NAME}"
-```
-
-## 📋 Checklist dla nowego komponentu
-
-### Frontend:
-- [ ] Folder: `js/features/[name]Page/0.1.0/`
-- [ ] `index.js` - używa window.Vue
-- [ ] `[Name]Page.js` - główny komponent
-- [ ] `standalone.html` - do testów
-- [ ] `package.json` - z wersją
-- [ ] `config/config.json` - konfiguracja
-- [ ] `CHANGELOG.md` - pusty
-
-### Backend:
-- [ ] Folder: `py/features/[name]Api/0.1.0/`
-- [ ] `main.py` - FastAPI app
-- [ ] `standalone.py` - runner
-- [ ] `requirements.txt` - zależności
-- [ ] `config.json` - konfiguracja
-- [ ] CORS włączone
-- [ ] Health endpoint
-
-### Testowanie:
-- [ ] Frontend standalone działa
-- [ ] Backend `/docs` dostępne
-- [ ] CORS pozwala na komunikację
-- [ ] `make run-[name]` działa
-
-## ⚠️ Ważne zasady
-
-1. **NIE współdziel kodu** - każda strona jest niezależna
-2. **NIE używaj importów ES6** - tylko window.Vue
-3. **ZAWSZE wersjonuj** - 0.1.0, 0.1.1, nie .backup
-4. **Port = unikalny** - Frontend 3001+, Backend 8001+
-5. **Standalone first** - musi działać bez reszty systemu
-
-## 🎯 Przykład: Kompletna strona w 5 minut
-
-```bash
-# 1. Stwórz parę komponentów
-./scripts/create-page-pair.sh reports
-
-# 2. Uruchom
-make run-reports
-
-# 3. Testuj
-# Frontend: http://localhost:3011/standalone.html
-# Backend: http://localhost:8003/docs
-
-# 4. Modyfikuj i od razu widzisz zmiany (hot reload)
-```
-
-Ta instrukcja zapewnia prostotę dla LLM - jeden kontekst, dwa pliki, zero zależności między stronami!
+Ta struktura jest bardziej intuicyjna i łatwiejsza w zarządzaniu niż poprzednie podejścia!
