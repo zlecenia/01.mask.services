@@ -7,7 +7,7 @@ VERSION := 0.1.0
 PROJECT_ROOT := .
 
 # Available pages and modules
-PAGES := login dashboard tests system
+PAGES := login dashboard tests system devices reports service settings workshop
 MODULES := auth footer header menu
 SCRIPTS_DIR := $(PROJECT_ROOT)/scripts
 
