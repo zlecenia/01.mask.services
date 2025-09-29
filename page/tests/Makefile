@@ -138,6 +138,20 @@ docker-down: ## Stop Docker containers
 docker-logs: ## Show Docker container logs
 	@cd $(DOCKER_DIR) && docker-compose logs -f
 
+.PHONY: stop
+stop: ## Stop all running services (Python, npm, Docker)
+	@echo "$(YELLOW)[STOP]$(NC) Stopping all running services..."
+	@echo "$(YELLOW)[STOP]$(NC) Stopping Docker containers..."
+	@cd $(DOCKER_DIR) && docker-compose down 2>/dev/null || true
+	@echo "$(YELLOW)[STOP]$(NC) Stopping Python backend processes..."
+	@pkill -f "python.*main.py" 2>/dev/null || true
+	@pkill -f "uvicorn.*main:app" 2>/dev/null || true
+	@echo "$(YELLOW)[STOP]$(NC) Stopping npm/http-server processes..."
+	@pkill -f "npm.*run.*dev" 2>/dev/null || true
+	@pkill -f "http-server.*$(FRONTEND_PORT)" 2>/dev/null || true
+	@pkill -f "python.*http.server.*$(FRONTEND_PORT)" 2>/dev/null || true
+	@echo "$(YELLOW)[STOP]$(NC) All services stopped"
+
 .PHONY: docker-test
 docker-test: ## Test Docker containers
 	@echo "$(GREEN)[DOCKER]$(NC) Testing Docker containers..."

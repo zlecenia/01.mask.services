@@ -132,7 +132,7 @@ const DashboardApp = {
         const loadMenuData = async () => {
             try {
                 // Try to load menu data from API
-                const response = await fetch(`http://localhost:8002/api/menu?role=${user.value.role}`);
+                const response = await fetch(`http://localhost:8102/api/menu?role=${user.value.role}`);
                 if (response.ok) {
                     const apiMenu = await response.json();
                     console.log('🔶 Vue: Menu data loaded from API', apiMenu);

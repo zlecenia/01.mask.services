@@ -4,7 +4,7 @@
   "description": "MaskService C20 - Main Dashboard Page",
   "main": "dashboard.js",
   "scripts": {
-    "dev": "python3 -m http.server 3002",
+    "dev": "python3 -m http.server 8202",
     "dev:backend": "cd ../../py/0.1.0 && python main.py",
     "dev:full": "concurrently \"npm run dev:backend\" \"npm run dev\"",
     "docker:build": "cd ../../docker/0.1.0 && docker-compose build",

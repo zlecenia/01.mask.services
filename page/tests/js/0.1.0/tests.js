@@ -170,7 +170,7 @@ const TestsApp = {
                     // Basic test options - navigate to device selection
                     try {
                         // Try to communicate with backend
-                        const response = await fetch(`http://localhost:8003/api/test/start`, {
+                        const response = await fetch(`http://localhost:8103/api/test/start`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({

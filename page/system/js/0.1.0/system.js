@@ -1,7 +1,7 @@
 /**
  * MaskService System Page - Vue.js 3 Application
  * Migrated from SystemScreen.js component to standalone application
- * Port: 8004 (page number-based port assignment)
+ * Port: 8104 (82** series port assignment)
  */
 
 const { createApp, reactive, computed, onMounted } = Vue;

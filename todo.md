@@ -28,3 +28,13 @@ Jak to uruchomic, aby np komponent edytora json, byl zaladowany jako pierwszy w 
 ## migracja komponentów
 usun wszystkie Mock pageTemplate content for Service Technician i wstaw docelowe rpodukcyjne wersje na bazie aktualnych komponentow w js/feature/*/*
 jeśli brakuje implementacji konkretnego komponentu to znajdz wczesniejsza wersje tutaj: /home/tom/github/zlecenia/c201001.mask.services/js
+
+
+
+## zmienne
+
+dodaj do wszystkich foldero docker plik .env z danymi portow hostow, itd tak aby korzystaly z nich wszystkie aplikacje wewnatrz konkretnego module , page , czyli docker/*/.env
+
+dodaj tez do kazdego make stop, ktory zatzryma wszystkie uslugi niezalezni e czy to python, npm  czy docker
+
+updated all  used ports to 82**

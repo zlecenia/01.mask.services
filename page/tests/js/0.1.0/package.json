@@ -5,7 +5,7 @@
   "main": "tests.js",
   "scripts": {
     "dev": "concurrently \"npm run serve\" \"npm run backend\"",
-    "serve": "python -m http.server 8083",
+    "serve": "python -m http.server 8203",
     "backend": "cd ../../py/0.1.0 && python main.py",
     "docker:build": "cd ../../docker/0.1.0 && docker-compose build",
     "docker:up": "cd ../../docker/0.1.0 && docker-compose up -d",
@@ -43,7 +43,7 @@
     "type": "git",
     "url": "https://github.com/maskservice/01.mask.services.git"
   },
-  "homepage": "http://localhost:8083",
+  "homepage": "http://localhost:8203",
   "bugs": {
     "url": "https://github.com/maskservice/01.mask.services/issues"
   }
