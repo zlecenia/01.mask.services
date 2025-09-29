@@ -7,9 +7,9 @@ PAGE_TYPE := page
 VERSION := 0.1.0
 PROJECT_ROOT := ../..
 
-# Port configuration
-BACKEND_PORT := 8003
-FRONTEND_PORT := 8083
+# Port configuration - Load from .env file
+include docker/0.1.0/.env
+export
 
 # Directories
 JS_DIR := js/$(VERSION)
