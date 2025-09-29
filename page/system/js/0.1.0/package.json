@@ -1,0 +1,84 @@
+{
+  "name": "maskservice-system-page",
+  "version": "0.1.0",
+  "description": "MaskService System Management Page - Vue.js frontend for system monitoring and control",
+  "main": "system.js",
+  "type": "module",
+  "scripts": {
+    "dev": "python3 -m http.server 8084",
+    "start": "npm run dev",
+    "backend": "cd ../../../py/0.1.0 && python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python main.py",
+    "docker:build": "cd ../../docker/0.1.0 && docker-compose build",
+    "docker:up": "cd ../../docker/0.1.0 && docker-compose up -d",
+    "docker:down": "cd ../../docker/0.1.0 && docker-compose down",
+    "docker:logs": "cd ../../docker/0.1.0 && docker-compose logs -f",
+    "docker:test": "cd ../../docker/0.1.0 && chmod +x test-docker.sh && ./test-docker.sh",
+    "test": "echo 'Frontend tests not yet implemented' && exit 0",
+    "test:integration": "echo 'Integration tests not yet implemented' && exit 0",
+    "test:e2e": "echo 'E2E tests not yet implemented' && exit 0",
+    "lint": "echo 'Linting not yet configured' && exit 0",
+    "format": "echo 'Code formatting not yet configured' && exit 0",
+    "build": "echo 'No build process required for CDN-based Vue.js' && exit 0",
+    "clean": "echo 'No build artifacts to clean' && exit 0"
+  },
+  "keywords": [
+    "maskservice",
+    "system",
+    "monitoring",
+    "management",
+    "vue.js",
+    "frontend",
+    "healthcare",
+    "iot"
+  ],
+  "author": "MaskService Team",
+  "license": "MIT",
+  "homepage": "https://github.com/maskservice/system-page",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maskservice/system-page.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maskservice/system-page/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "config": {
+    "ports": {
+      "frontend": 8084,
+      "backend": 8004
+    },
+    "api": {
+      "baseUrl": "http://localhost:8004"
+    }
+  },
+  "maskservice": {
+    "page": "system",
+    "version": "0.1.0",
+    "type": "frontend",
+    "framework": "vue.js",
+    "backend": "../../../py/0.1.0/",
+    "docker": "../../docker/0.1.0/",
+    "features": [
+      "system-monitoring",
+      "system-control",
+      "performance-metrics",
+      "log-management",
+      "module-management",
+      "system-restart",
+      "system-shutdown"
+    ]
+  }
+}
