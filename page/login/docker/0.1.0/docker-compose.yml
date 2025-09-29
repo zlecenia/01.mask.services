@@ -3,8 +3,8 @@ version: '3.8'
 services:
   login-backend:
     build:
-      context: .
-      dockerfile: Dockerfile.backend
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.backend
     container_name: maskservice-login-backend
     ports:
       - "8001:8001"
@@ -18,8 +18,8 @@ services:
 
   login-frontend:
     build:
-      context: .
-      dockerfile: Dockerfile.frontend
+      context: ../..
+      dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-login-frontend
     ports:
       - "3001:80"

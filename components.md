@@ -6,6 +6,13 @@
 01.mask.services/
 ├── page/                        # Kompletne strony (frontend + backend)
 │   ├── login/
+│   │   ├── docker
+│   │   │   └── 0.1.0
+│   │   │       ├── docker-compose.yml
+│   │   │       ├── Dockerfile.backend
+│   │   │       ├── Dockerfile.frontend
+│   │   │       ├── nginx.conf
+│   │   │       └── test-docker.sh
 │   │   ├── js/                 # Frontend (Vue.js)
 │   │   │   └── 0.1.0/
 │   │   │       ├── index.html

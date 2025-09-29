@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Simplified Docker test script for tests page
-# This script builds and runs the tests page containers for testing
+# Simplified Docker test script for dashboard page
+# This script builds and runs the dashboard page containers for testing
 
 set -e
 
-echo "🚀 Starting MaskService Tests Page Docker Setup"
-echo "=============================================="
+echo "🚀 Starting MaskService Dashboard Page Docker Setup"
+echo "=================================================="
 
 # Colors for output
 RED='\033[0;31m'
@@ -54,13 +54,13 @@ sleep 10
 # Check if backend is healthy
 print_status "Checking backend health..."
 for i in {1..30}; do
-    if curl -s http://localhost:8003/ >/dev/null 2>&1; then
+    if curl -s http://localhost:8002/ >/dev/null 2>&1; then
         print_status "Backend is healthy!"
         break
     fi
     if [ $i -eq 30 ]; then
         print_error "Backend failed to start properly"
-        docker-compose logs tests-backend
+        docker-compose logs dashboard-backend
         exit 1
     fi
     sleep 2
@@ -68,23 +68,23 @@ done
 
 # Check if frontend is accessible
 print_status "Checking frontend accessibility..."
-if curl -s http://localhost:8083/ >/dev/null 2>&1; then
+if curl -s http://localhost:8082/ >/dev/null 2>&1; then
     print_status "Frontend is accessible!"
 else
     print_warning "Frontend may not be ready yet"
 fi
 
 echo ""
-echo "=============================================="
-print_status "Tests page is now running!"
+echo "=================================================="
+print_status "Dashboard page is now running!"
 echo ""
-echo "Frontend: http://localhost:8083"
-echo "Backend API: http://localhost:8003"
-echo "API Docs: http://localhost:8003/docs"
+echo "Frontend: http://localhost:8082"
+echo "Backend API: http://localhost:8002"
+echo "API Docs: http://localhost:8002/docs"
 echo ""
 echo "To stop the containers:"
 echo "  docker-compose down"
 echo ""
 echo "To view logs:"
 echo "  docker-compose logs -f"
-echo "=============================================="
+echo "=================================================="
