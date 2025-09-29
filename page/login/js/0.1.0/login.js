@@ -75,8 +75,8 @@ const LoginApp = {
                     localStorage.setItem('user', data.username);
                     localStorage.setItem('role', data.role);
                     
-                    // Navigate to dashboard
-                    window.location.href = '/page/dashboard/js/0.1.0/';
+                    // Navigate to dashboard on correct port
+                    window.location.href = 'http://127.0.0.1:8202/';
                 } else {
                     const errorData = await response.json();
                     loginState.error = errorData.detail || 'Błąd logowania';
@@ -91,7 +91,7 @@ const LoginApp = {
                     console.log('🔶 Vue: Using fallback authentication');
                     localStorage.setItem('user', loginState.selectedRole.key.toLowerCase());
                     localStorage.setItem('role', loginState.selectedRole.key);
-                    window.location.href = '/page/dashboard/js/0.1.0/';
+                    window.location.href = 'http://127.0.0.1:8202/';
                 }
             } finally {
                 loginState.isLoading = false;
