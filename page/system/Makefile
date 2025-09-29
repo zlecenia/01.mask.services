@@ -54,7 +54,7 @@ install-frontend: ## Install frontend dependencies
 .PHONY: install-backend
 install-backend: ## Install backend dependencies
 	@echo "$(GREEN)[INSTALL]$(NC) Installing backend dependencies..."
-	@cd $(PY_DIR) && python3 -m venv venv && bash -c "source venv/bin/activate && pip install -r requirements.txt"
+	@cd $(PY_DIR) && python3 -m venv --without-pip venv && curl -s https://bootstrap.pypa.io/get-pip.py | venv/bin/python && venv/bin/pip install -r requirements.txt
 	@echo "$(GREEN)[INSTALL]$(NC) Backend dependencies installed"
 
 .PHONY: build
@@ -69,7 +69,7 @@ build-frontend: install-frontend ## Build frontend
 .PHONY: build-backend
 build-backend: install-backend ## Build backend
 	@echo "$(GREEN)[BUILD]$(NC) Building backend..."
-	@cd $(PY_DIR) && bash -c "source venv/bin/activate && python -m py_compile main.py"
+	@cd $(PY_DIR) && venv/bin/python -m py_compile main.py
 	@echo "$(GREEN)[BUILD]$(NC) Backend build completed"
 
 .PHONY: dev
@@ -88,7 +88,7 @@ dev-frontend: ## Start frontend development server
 .PHONY: dev-backend
 dev-backend: ## Start backend development server
 	@echo "$(GREEN)[DEV]$(NC) Starting backend development server..."
-	@cd $(PY_DIR) && bash -c "source venv/bin/activate && python main.py"
+	@cd $(PY_DIR) && venv/bin/python main.py
 
 .PHONY: test
 test: test-frontend test-backend test-integration ## Run all tests
@@ -161,7 +161,7 @@ lint-frontend: ## Lint frontend code
 .PHONY: lint-backend
 lint-backend: ## Lint backend code
 	@echo "$(GREEN)[LINT]$(NC) Linting backend..."
-	@cd $(PY_DIR) && bash -c "source venv/bin/activate && flake8 . 2>/dev/null || echo 'flake8 not installed'"
+	@cd $(PY_DIR) && (venv/bin/python -m flake8 . 2>/dev/null || echo 'flake8 not installed')
 
 .PHONY: format
 format: format-frontend format-backend ## Format code
@@ -174,7 +174,7 @@ format-frontend: ## Format frontend code
 .PHONY: format-backend
 format-backend: ## Format backend code
 	@echo "$(GREEN)[FORMAT]$(NC) Formatting backend..."
-	@cd $(PY_DIR) && bash -c "source venv/bin/activate && black . 2>/dev/null || echo 'black not installed'"
+	@cd $(PY_DIR) && (venv/bin/python -m black . 2>/dev/null || echo 'black not installed')
 
 .PHONY: clean
 clean: clean-frontend clean-backend docker-clean ## Clean all build artifacts
