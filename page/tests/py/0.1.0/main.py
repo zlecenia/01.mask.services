@@ -276,6 +276,16 @@ async def delete_test(test_id: str):
     else:
         raise HTTPException(status_code=404, detail="Test not found")
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker container health monitoring"""
+    return {
+        "status": "healthy",
+        "service": "tests",
+        "version": "0.1.0",
+        "timestamp": "2025-09-29"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting MaskService Tests API on http://localhost:8003")

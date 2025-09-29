@@ -1,3 +1,5 @@
+przeprowadz migracje korzystajac z pliku /home/tom/github/zlecenia/01.mask.services/migration_from_1001.md
+
 # 📋 Plan Migracji 1001 → 01 z Promptami dla LLM
 
 przenieś kolejne moduły z /home/tom/github/zlecenia/1001.mask.services/js/components

@@ -16,7 +16,7 @@ services:
       retries: ${HEALTH_CHECK_RETRIES}
       start_period: ${HEALTH_CHECK_START_PERIOD}
     networks:
-      - ${NETWORK_NAME}
+      - default
 
   tests-frontend:
     build:
@@ -29,7 +29,7 @@ services:
       tests-backend:
         condition: service_healthy
     networks:
-      - ${NETWORK_NAME}
+      - default
 
 networks:
   default:

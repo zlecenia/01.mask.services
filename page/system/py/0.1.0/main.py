@@ -337,6 +337,16 @@ async def get_system_status():
         "total_modules": len(SYSTEM_MODULES)
     }
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker container health monitoring"""
+    return {
+        "status": "healthy",
+        "service": "system",
+        "version": "0.1.0",
+        "timestamp": "2025-09-29"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     print("🛡️ Starting MaskService System API on http://localhost:8004")

@@ -192,6 +192,16 @@ async def track_menu_selection(menu_id: str, role: str = "OPERATOR"):
         "timestamp": datetime.now().isoformat()
     }
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker container health monitoring"""
+    return {
+        "status": "healthy",
+        "service": "dashboard",
+        "version": "0.1.0",
+        "timestamp": "2025-09-29"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting MaskService Dashboard API on http://localhost:8002")

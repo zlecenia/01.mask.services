@@ -137,6 +137,16 @@ async def get_available_roles():
         ]
     }
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for Docker container health monitoring"""
+    return {
+        "status": "healthy",
+        "service": "login",
+        "version": "0.1.0",
+        "timestamp": "2025-09-29"
+    }
+
 if __name__ == "__main__":
     import uvicorn
     print("🚀 Starting MaskService Login API on http://localhost:8001")
