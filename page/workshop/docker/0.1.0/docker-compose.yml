@@ -30,20 +30,19 @@ services:
       workshop-backend:
         condition: service_healthy
 
-  # Advanced Frontend Testing Service
-  workshop-frontend-tester:
-    image: node:18-alpine
-    container_name: maskservice-workshop-frontend-tester
-    working_dir: /app
-    volumes:
-      - ./test-frontend.js:/app/test-frontend.js
-    command: >
-      sh -c "
-        npm install -g puppeteer &&
-        node test-frontend.js http://workshop-frontend:80/
-      "
+  maskservice-workshop-puppeteer:
+    build:
+      context: .
+      dockerfile: Dockerfile.puppeteer
+    container_name: maskservice-workshop-puppeteer
     depends_on:
-      workshop-frontend:
+      workshop-backend:
         condition: service_healthy
-    profiles:
-      - testing
+      workshop-frontend:
+        condition: service_started
+    environment:
+      - BACKEND_URL=http://workshop-backend:8211
+      - FRONTEND_URL=http://maskservice-workshop-frontend
+    volumes:
+      - /tmp:/tmp
+    command: ["sh", "-c", "sleep 10 && node puppeteer-test.js"]

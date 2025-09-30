@@ -30,20 +30,19 @@ services:
       reports-backend:
         condition: service_healthy
 
-  # Advanced Frontend Testing Service
-  reports-frontend-tester:
-    image: node:18-alpine
-    container_name: maskservice-reports-frontend-tester
-    working_dir: /app
-    volumes:
-      - ./test-frontend.js:/app/test-frontend.js
-    command: >
-      sh -c "
-        npm install -g puppeteer &&
-        node test-frontend.js http://reports-frontend:80/
-      "
+  maskservice-reports-puppeteer:
+    build:
+      context: .
+      dockerfile: Dockerfile.puppeteer
+    container_name: maskservice-reports-puppeteer
     depends_on:
-      reports-frontend:
+      reports-backend:
         condition: service_healthy
-    profiles:
-      - testing
+      reports-frontend:
+        condition: service_started
+    environment:
+      - BACKEND_URL=http://reports-backend:8208
+      - FRONTEND_URL=http://maskservice-reports-frontend
+    volumes:
+      - /tmp:/tmp
+    command: ["sh", "-c", "sleep 10 && node puppeteer-test.js"]

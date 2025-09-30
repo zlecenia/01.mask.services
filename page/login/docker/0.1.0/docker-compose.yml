@@ -30,20 +30,19 @@ services:
       login-backend:
         condition: service_healthy
 
-  # Advanced Frontend Testing Service
-  login-frontend-tester:
-    image: node:18-alpine
-    container_name: maskservice-login-frontend-tester
-    working_dir: /app
-    volumes:
-      - ./test-frontend.js:/app/test-frontend.js
-    command: >
-      sh -c "
-        npm install -g puppeteer &&
-        node test-frontend.js http://login-frontend:80/
-      "
+  maskservice-login-puppeteer:
+    build:
+      context: .
+      dockerfile: Dockerfile.puppeteer
+    container_name: maskservice-login-puppeteer
     depends_on:
-      login-frontend:
+      login-backend:
         condition: service_healthy
-    profiles:
-      - testing
+      login-frontend:
+        condition: service_started
+    environment:
+      - BACKEND_URL=http://login-backend:8201
+      - FRONTEND_URL=http://maskservice-login-frontend
+    volumes:
+      - /tmp:/tmp
+    command: ["sh", "-c", "sleep 10 && node puppeteer-test.js"]

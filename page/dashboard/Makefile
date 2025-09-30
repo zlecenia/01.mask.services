@@ -4,8 +4,8 @@ COMPONENT_TYPE := page
 VERSION := 0.1.0
 
 # Port configuration
-BACKEND_PORT := 8109
-FRONTEND_PORT := 8209
+BACKEND_PORT := 8202
+FRONTEND_PORT := 8222
 
 .PHONY: help build test clean install docker-build docker-up docker-down
 
@@ -42,15 +42,6 @@ dev: ## Start development server
 	cd docker/$(VERSION) && docker-compose up
 
 # Docker testing target
-docker-test: docker-up
-	@echo "[DOCKER-TEST] Testing Docker containers..."
-	@sleep 5  # Wait for containers to be ready
-	@echo "[INFO] Testing backend health check..."
-	@curl -f http://localhost:$(BACKEND_PORT)/health || echo "[ERROR] Backend health check failed"
-	@echo "[INFO] Testing frontend accessibility..."
-	@curl -f http://localhost:$(FRONTEND_PORT)/ || echo "[ERROR] Frontend accessibility failed"
-	@echo "[DOCKER-TEST] Docker test completed"
-
 .PHONY: docker-test
 
 # Stop all services (python, npm, docker)
@@ -65,4 +56,13 @@ stop:
 		cd docker/0.1.0 && docker-compose down --remove-orphans 2>/dev/null || true; \
 	fi
 	@echo "[STOP] All services stopped for $(notdir $(CURDIR))"
+# Test Docker containers with correct 82xx ports
+.PHONY: docker-test
+docker-test: docker-up
+	@echo "[DOCKER-TEST] Testing Docker containers..."
+	@echo "[INFO] Testing backend health check..."
+	@curl -f http://localhost:8202/health || echo "[ERROR] Backend health check failed"
+	@echo "[INFO] Testing frontend accessibility..."
+	@curl -f http://localhost:8222/ || echo "[ERROR] Frontend accessibility failed"
+	@echo "[DOCKER-TEST] Docker test completed"
 
