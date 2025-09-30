@@ -10,7 +10,7 @@ async function testMaskServiceService() {
         console.log('🔧 Launching Chromium browser...');
         browser = await puppeteer.launch({
             headless: 'new',
-            executablePath: '/usr/bin/chromium-browser',
+            executablePath: '/usr/bin/chromium',
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -76,6 +76,7 @@ async function testMaskServiceService() {
             const hasCustomScript = document.querySelector(`script[src*="service"]`) !== null;
             const hasCustomCSS = document.querySelector(`link[href*="service"]`) !== null;
             const bodyContent = document.body.innerHTML.length;
+            const vueAppContent = document.querySelector('#app')?.innerHTML.length || 0;
             
             return {
                 title,
@@ -84,6 +85,7 @@ async function testMaskServiceService() {
                 hasCustomScript,
                 hasCustomCSS,
                 bodyContentLength: bodyContent,
+                vueAppContentLength: vueAppContent,
                 htmlStructure: document.documentElement.outerHTML.substring(0, 500)
             };
         });
@@ -95,6 +97,7 @@ async function testMaskServiceService() {
         console.log(`  Custom service.js: ${htmlAnalysis.hasCustomScript ? '✅' : '❌'}`);
         console.log(`  Custom service.css: ${htmlAnalysis.hasCustomCSS ? '✅' : '❌'}`);
         console.log(`  Body Content Length: ${htmlAnalysis.bodyContentLength} chars`);
+        console.log(`  Vue App Content Length: ${htmlAnalysis.vueAppContentLength} chars`);
         
         // Take screenshot for debugging
         console.log('📸 Taking screenshot for debugging...');
@@ -144,7 +147,7 @@ async function testMaskServiceService() {
             backendHealthy: true, // We'll assume true if we got here
             frontendAccessible: true,
             vueJsLoaded: vueLoaded,
-            htmlValid: htmlAnalysis.bodyContentLength > 100,
+            htmlValid: htmlAnalysis.hasVueApp && htmlAnalysis.hasVueScript && htmlAnalysis.hasCustomScript,
             jsExecuting: jsTest.jsWorking,
             screenshotTaken: true
         };

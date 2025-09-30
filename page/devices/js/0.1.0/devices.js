@@ -643,5 +643,8 @@ if (typeof window !== 'undefined') {
     injectStyles();
 }
 
-// Export component
-export default DeviceSelectTemplate;
+// Mount Vue app directly (no ES6 export needed)
+if (typeof window !== 'undefined' && typeof Vue !== 'undefined') {
+    const { createApp } = Vue;
+    createApp(DeviceSelectTemplate).mount('#app');
+}
