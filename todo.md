@@ -1,8 +1,3 @@
-- makefile dla wszystkich procesow w module/*/makefile i  page/*/makefile
-- ./scripts/*.sh  ./scripts/*.py dla skryptow uzywanych z makefile
-- testowanie poszczegolnych modulow jeden po drugim
-
-
 ## migracja
 przenieś kolejne moduły z /home/tom/github/zlecenia/c201001.mask.services/js/components
 do /home/tom/github/zlecenia/01.mask.services/*/*/*/* uwzględniając wskazówki migracji z pliku /home/tom/github/zlecenia/01.mask.services/components.md
@@ -11,6 +6,12 @@ do /home/tom/github/zlecenia/01.mask.services/*/*/*/* uwzględniając wskazówki
 jak uruchamiać osobno każdy moduł w przeglądarce jako usługa?
 stworz dodatkowoe pliki jesli to koneiczne i dodaj scripts w package.json oraz zaktualizuj dokumetnacje README.md w każdym module, aby 
  po wejściu do folderu feature, np  /home/tom/github/zlecenia/01.mask.services/module/header/js/0.1.0/   uruchomienie danego rozszerzenia w przegladarce poprzez docker w celu przetetsowania /home/tom/github/zlecenia/01.mask.services/module/header/docker/0.1.0/
+
+- makefile dla wszystkich procesow w module/*/makefile i  page/*/makefile
+- ./scripts/*.sh  ./scripts/*.py dla skryptow uzywanych z makefile
+- testowanie poszczegolnych modulow jeden po drugim
+
+
 
 ## selektywne uruchamianie
 zaktulaizuj dokumentacje odnosnie uruchamiania selektywnie każdego modułu jako kompletnego poprzez wywołania ze scripts w package.json, tak aby kazdy komponent działał niezaleznie i mozna go była nie tylko prztetsować przez unit tests ale rownież uruchomić niezaleznie
@@ -33,7 +34,8 @@ jeśli brakuje implementacji konkretnego komponentu to znajdz wczesniejsza wersj
 
 ## zmienne
 
-dodaj do wszystkich foldero docker plik .env z danymi portow hostow, itd tak aby korzystaly z nich wszystkie aplikacje wewnatrz konkretnego module , page , czyli docker/*/.env
+dodaj do wszystkich folderow z docker plik .env z danymi portow hostow z docker, npm, , itd
+tak aby korzystaly z nich wszystkie aplikacje wewnatrz konkretnego module , page , czyli docker/*/.env
 
 dodaj tez do kazdego make stop, ktory zatzryma wszystkie uslugi niezalezni e czy to python, npm  czy docker
 

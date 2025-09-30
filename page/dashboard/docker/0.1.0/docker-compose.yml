@@ -20,7 +20,7 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-dashboard-frontend
     ports:
-      - "8202:8202"
+      - "8222:80"
     depends_on:
       dashboard-backend:
         condition: service_healthy

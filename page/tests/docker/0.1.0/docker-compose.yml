@@ -20,7 +20,7 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-tests-frontend
     ports:
-      - "8203:8203"
+      - "8223:80"
     depends_on:
       tests-backend:
         condition: service_healthy

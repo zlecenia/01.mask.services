@@ -20,7 +20,7 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-devices-frontend
     ports:
-      - "8207:8207"
+      - "8227:80"
     depends_on:
       devices-backend:
         condition: service_healthy
