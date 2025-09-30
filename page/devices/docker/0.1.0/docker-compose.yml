@@ -5,11 +5,11 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.backend
     container_name: maskservice-devices-backend
     ports:
-      - "8107:8107"
+      - "8207:8207"
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8107/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8207/health"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -20,7 +20,7 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-devices-frontend
     ports:
-      - "8207:80"
+      - "8207:8207"
     depends_on:
       devices-backend:
         condition: service_healthy

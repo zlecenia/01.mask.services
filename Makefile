@@ -291,3 +291,20 @@ ca: clean-all ## Alias for clean-all
 .PHONY: _completion
 _completion:
 	@echo "build-all build-page-login build-page-dashboard build-page-tests build-page-system clean-all clean-page-login clean-page-dashboard clean-page-tests clean-page-system dev-login dev-dashboard dev-tests dev-system docker-build-all docker-cleanup-all docker-down-all docker-up-all health-check-all help install-all list-modules list-pages project-info show-ports status test-all test-docker-all update-scripts validate-all validate-page"
+
+# Stop all services across all components  
+.PHONY: stop-all
+stop-all:
+	@echo "[STOP-ALL] Stopping all services across all components..."
+	@for dir in page/* module/*; do \
+		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
+			echo "[STOP-ALL] Stopping services in $$dir..."; \
+			$(MAKE) -C "$$dir" stop || true; \
+		fi; \
+	done
+	@echo "[STOP-ALL] All services stopped"
+
+# Alias for convenience
+.PHONY: stop
+stop: stop-all
+

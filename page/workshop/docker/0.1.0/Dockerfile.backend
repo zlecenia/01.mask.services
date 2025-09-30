@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY py/0.1.0/ .
 
-EXPOSE 8108
+EXPOSE 8211
 
 CMD ["python", "main.py"]

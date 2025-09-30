@@ -5,11 +5,11 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.backend
     container_name: maskservice-dashboard-backend
     ports:
-      - "8109:8109"
+      - "8202:8202"
     environment:
       - PYTHONUNBUFFERED=1
     healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8109/health')"]
+      test: ["CMD", "curl", "-f", "http://localhost:8202/health"]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -20,7 +20,7 @@ services:
       dockerfile: docker/0.1.0/Dockerfile.frontend
     container_name: maskservice-dashboard-frontend
     ports:
-      - "8209:80"
+      - "8202:8202"
     depends_on:
       dashboard-backend:
         condition: service_healthy

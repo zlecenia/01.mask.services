@@ -28,3 +28,29 @@ clean: ## Clean build artifacts
 	rm -rf js/$(VERSION)/node_modules
 	rm -rf js/$(VERSION)/dist
 
+
+# Docker testing target
+docker-test: docker-up
+	@echo "[DOCKER-TEST] Testing Docker containers..."
+	@sleep 5  # Wait for containers to be ready
+	@echo "[INFO] Testing backend health check..."
+	@curl -f http://localhost:$(BACKEND_PORT)/health || echo "[ERROR] Backend health check failed"
+	@echo "[INFO] Testing frontend accessibility..."
+	@curl -f http://localhost:$(FRONTEND_PORT)/ || echo "[ERROR] Frontend accessibility failed"
+	@echo "[DOCKER-TEST] Docker test completed"
+
+.PHONY: docker-test
+
+# Stop all services (python, npm, docker)
+.PHONY: stop
+stop:
+	@echo "[STOP] Stopping all services for $(notdir $(CURDIR))..."
+	@-pkill -f "python.*$(notdir $(CURDIR))" 2>/dev/null || true
+	@-pkill -f "npm.*$(notdir $(CURDIR))" 2>/dev/null || true
+	@-pkill -f "node.*$(notdir $(CURDIR))" 2>/dev/null || true
+	@if [ -d "docker/0.1.0" ]; then \
+		echo "[STOP] Stopping Docker containers..."; \
+		cd docker/0.1.0 && docker-compose down --remove-orphans 2>/dev/null || true; \
+	fi
+	@echo "[STOP] All services stopped for $(notdir $(CURDIR))"
+
