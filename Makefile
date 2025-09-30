@@ -219,6 +219,61 @@ health-check-all: ## Run health checks on all running services
 		cd ../..; \
 	done
 
+# E2E testing (scripts/*)
+.PHONY: e2e-all e2e-login e2e-flow e2e-devices e2e-reports test-e2e
+
+e2e-login: ## Run E2E login/dashboard flow checks (containers must be up)
+	@echo "$(GREEN)[E2E]$(NC) Running login flow E2E tests..."
+	@python3 $(SCRIPTS_DIR)/test_login_flow.py
+
+e2e-flow: ## Run complete login→dashboard E2E
+	@echo "$(GREEN)[E2E]$(NC) Running complete flow E2E tests..."
+	@python3 $(SCRIPTS_DIR)/test_complete_flow.py
+
+e2e-devices: ## Run devices page E2E (backend 8107, frontend 8207)
+	@echo "$(GREEN)[E2E]$(NC) Running devices E2E tests..."
+	@python3 $(SCRIPTS_DIR)/test_devices_page.py
+
+e2e-reports: ## Run reports page E2E (backend 8108, frontend 8208)
+	@echo "$(GREEN)[E2E]$(NC) Running reports E2E tests..."
+	@python3 $(SCRIPTS_DIR)/test_reports_page.py
+
+e2e-all: ## Run all E2E tests (login flow, complete flow, devices, reports)
+	@echo "$(GREEN)[E2E]$(NC) Running all E2E tests..."
+	@set -e; \
+	FAIL=0; \
+	python3 $(SCRIPTS_DIR)/test_login_flow.py || FAIL=$$(($$FAIL+1)); \
+	python3 $(SCRIPTS_DIR)/test_complete_flow.py || FAIL=$$(($$FAIL+1)); \
+	python3 $(SCRIPTS_DIR)/test_devices_page.py || FAIL=$$(($$FAIL+1)); \
+	python3 $(SCRIPTS_DIR)/test_reports_page.py || FAIL=$$(($$FAIL+1)); \
+	if [ $$FAIL -eq 0 ]; then \
+	  echo "$(GREEN)[E2E] All E2E tests PASSED$(NC)"; \
+	else \
+	  echo "$(RED)[E2E] $$FAIL E2E test(s) FAILED$(NC)"; \
+	  exit 1; \
+	fi
+
+test-e2e: e2e-all ## Alias for e2e-all
+
+# E2E with container management
+.PHONY: e2e-with-containers
+e2e-with-containers: ## Start containers, run E2E, optionally stop (login, dashboard, devices, reports)
+	@echo "$(CYAN)[E2E-CONTAINERS]$(NC) Starting required containers..."
+	@echo "$(BLUE)[INFO]$(NC) Starting login (8101/8201)..."
+	@cd page/login/docker/0.1.0 && docker-compose up -d || true
+	@echo "$(BLUE)[INFO]$(NC) Starting dashboard (8102/8202)..."
+	@cd page/dashboard/docker/0.1.0 && docker-compose up -d || true
+	@echo "$(BLUE)[INFO]$(NC) Starting devices (8207/8227)..."
+	@cd page/devices/docker/0.1.0 && docker-compose up -d || true
+	@echo "$(BLUE)[INFO]$(NC) Starting reports (8208/8228)..."
+	@cd page/reports/docker/0.1.0 && docker-compose up -d || true
+	@echo "$(CYAN)[E2E-CONTAINERS]$(NC) Waiting 15s for services to be ready..."
+	@sleep 15
+	@echo "$(GREEN)[E2E-CONTAINERS]$(NC) Running E2E tests..."
+	@$(MAKE) e2e-all || (echo "$(RED)[E2E-CONTAINERS] Tests failed$(NC)" && exit 1)
+	@echo "$(GREEN)[E2E-CONTAINERS]$(NC) E2E tests completed successfully"
+	@echo "$(YELLOW)[E2E-CONTAINERS]$(NC) Containers still running. Stop with: make stop-all"
+
 # Maintenance operations
 .PHONY: update-scripts
 update-scripts: ## Make all scripts executable
@@ -290,7 +345,7 @@ ca: clean-all ## Alias for clean-all
 # Auto-completion helper
 .PHONY: _completion
 _completion:
-	@echo "build-all build-page-login build-page-dashboard build-page-tests build-page-system clean-all clean-page-login clean-page-dashboard clean-page-tests clean-page-system dev-login dev-dashboard dev-tests dev-system docker-build-all docker-cleanup-all docker-down-all docker-up-all health-check-all help install-all list-modules list-pages project-info show-ports status test-all test-docker-all update-scripts validate-all validate-page"
+	@echo "build-all build-page-login build-page-dashboard build-page-tests build-page-system clean-all clean-page-login clean-page-dashboard clean-page-tests clean-page-system dev-login dev-dashboard dev-tests dev-system docker-build-all docker-cleanup-all docker-down-all docker-up-all health-check-all help install-all list-modules list-pages project-info show-ports status test-all test-docker-all update-scripts validate-all validate-page e2e-all e2e-login e2e-flow e2e-devices e2e-reports test-e2e e2e-with-containers"
 
 # Stop all services across all components  
 .PHONY: stop-all
@@ -307,4 +362,3 @@ stop-all:
 # Alias for convenience
 .PHONY: stop
 stop: stop-all
-

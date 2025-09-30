@@ -447,62 +447,106 @@ EOF
 
 ## 📊 Tabela mapowania komponentów
 
-| c201001.mask.services | 01.mask.services | Typ |
-|-----------------------|------------------|-----|
-| js/components/LoginScreen.js | page/login/js/0.1.0/ | Strona |
-| js/components/UserMenuScreen.js | page/dashboard/js/0.1.0/ | Strona |
-| js/components/TestMenuTemplate.js | page/tests/js/0.1.0/ | Strona |
-| js/components/vue/AppHeader.js | module/header/js/0.1.0/ | Moduł |
-| js/components/vue/AppFooter.js | module/footer/js/0.1.0/ | Moduł |
-| config/menu.json | module/menu/py/0.1.0/ | Moduł |
+| c201001.mask.services | 01.mask.services | Status | Uwagi |
+|-----------------------|------------------|--------|-------|
+| js/components/LoginScreen.js | page/login/js/0.1.0/ | ✅ Gotowy | Multi-role auth |
+| js/components/UserMenuScreen.js | page/dashboard/js/0.1.0/ | ✅ Gotowy | Menu kontekstowe |
+| js/components/TestMenuTemplate.js | page/tests/js/0.1.0/ | ✅ Gotowy | Framework testowy |
+| js/components/DeviceSelectTemplate.js | page/devices/js/0.1.0/ | ✅ **Naprawiony** | MIME/export errors fixed |
+| js/components/ReportsViewTemplate.js | page/reports/js/0.1.0/ | 🔄 W trakcie | Generowanie raportów |
+| js/components/vue/AppHeader.js | module/header/js/0.1.0/ | 🔄 W trakcie | Nagłówek współdzielony |
+| js/components/vue/AppFooter.js | module/footer/js/0.1.0/ | 🔄 W trakcie | Stopka współdzielona |
+| config/menu.json | module/menu/py/0.1.0/ | 🔄 W trakcie | API menu |
+
+### 🎯 Status komponentów (aktualizacja)
+
+| Komponent | Status | Porty Backend/Frontend | Ostatnia aktualizacja |
+|-----------|--------|----------------------|---------------------|
+| **page/login** | ✅ Gotowy | 8101/8201 | Autoryzacja działająca |
+| **page/dashboard** | ✅ Gotowy | 8102/8202 | Menu i nawigacja |
+| **page/system** | ✅ Gotowy | 8104/8204 | Monitoring systemu |
+| **page/tests** | ✅ Gotowy | 8103/8203 | Framework testowy |
+| **page/devices** | ✅ **Naprawiony** | 8207/8227 | **Fixed**: MIME types, export syntax |
+| **page/reports** | 🔄 W trakcie | 8108/8208 | Backend częściowo gotowy |
+| **page/service** | 🔄 Planowany | 8109/8209 | Serwis techniczny |
+| **page/settings** | 🔄 Planowany | 8110/8210 | Konfiguracja systemu |
+| **page/workshop** | 🔄 Planowany | 8111/8211 | Panel warsztatowy |
+
+## 🧪 System testowania E2E
+
+### Nowe narzędzia testowe (2024)
+
+Dodano kompleksowy system testów End-to-End z automatycznym zarządzaniem kontenerami:
+
+```bash
+# Główne komendy E2E (z root/)
+make test-e2e                 # Wszystkie testy E2E (kontenery muszą być uruchomione)
+make e2e-with-containers      # E2E z automatycznym zarządzaniem kontenerami
+make e2e-login               # Test flow logowania
+make e2e-devices             # Test devices page  
+make e2e-reports             # Test reports page
+make e2e-flow                # Test pełnego flow login→dashboard
+
+# E2E na poziomie komponentu (z page/[nazwa]/)
+make e2e                     # Start kontenery → test → stop
+make e2e-puppeteer           # Testy Puppeteer (headless browser)
+make test-health             # Health check (backend/frontend)
+```
+
+### Skrypty testowe (`scripts/`)
+
+| Skrypt | Funkcjonalność | Porty |
+|--------|---------------|-------|
+| `test_login_flow.py` | Kompleksowy test logowania + dashboard | 8101/8201, 8102/8202 |
+| `test_complete_flow.py` | Pełny flow aplikacji | Wszystkie |
+| `test_devices_page.py` | Test devices page | 8207/8227 |
+| `test_reports_page.py` | Test reports page | 8108/8208 |
+| `advanced_puppeteer_testing.py` | Generator testów Puppeteer | Wszystkie |
+
+### Co testują skrypty E2E
+
+- ✅ **Backend health checks** - `/health` endpoints
+- ✅ **Frontend accessibility** - ładowanie HTML/CSS/JS  
+- ✅ **Vue.js rendering** - sprawdzenie komponentów
+- ✅ **MIME types** - poprawność serwowania plików
+- ✅ **Navigation flow** - przejścia między stronami
+- ✅ **Authentication** - różne role użytkowników
+- ✅ **JavaScript execution** - działanie kodu JS
+- ✅ **Performance metrics** - metryki wydajności
+
+### Naprawione problemy testowe
+
+#### Devices page (8207/8227)
+- ❌ `devices.css` MIME type "text/html" → ✅ "text/css"
+- ❌ "export declarations may only appear at top level of a module" → ✅ Usunięto ES6 exports
+- ❌ Nginx SPA fallback dla CSS → ✅ Dedykowana obsługa statycznych assets
+- ❌ Puppeteer duplicate variables → ✅ Wyczyszczono kod testowy
 
 ## 🚀 Makefile główny
 
 ```makefile
-# 01.mask.services/Makefile
+# 01.mask.services/Makefile - Zaktualizowany z E2E
 
-# Uruchomienie strony (frontend + backend)
-run-login:
-	cd page/login/py/0.1.0 && python main.py &
-	cd page/login/js/0.1.0 && python3 -m http.server 9001
+# Testowanie E2E (nowe!)
+test-e2e:                    # Wszystkie testy E2E
+e2e-with-containers:         # E2E z zarządzaniem kontenerami  
+e2e-login:                   # Test logowania
+e2e-devices:                 # Test devices (naprawiony)
+e2e-reports:                 # Test reports
+e2e-flow:                    # Pełny flow
 
-run-dashboard:
-	cd page/dashboard/py/0.1.0 && python main.py &
-	cd page/dashboard/js/0.1.0 && python3 -m http.server 9002
+# Build i deploy
+build-all:                   # Build wszystkich komponentów
+docker-build-all:            # Build obrazów Docker
+docker-up-all:               # Start kontenerów (uwaga: konflikty portów)
 
-# Migracja
-migrate-all:
-	./migration/init-structure.sh
-	./migration/migrate-login.sh
-	./migration/migrate-dashboard.sh
-	./migration/migrate-tests.sh
+# Health checks
+health-check-all:            # Health check wszystkich usług
+test-docker-all:             # Test kontenerów
 
-# Test struktury
-test-structure:
-	@echo "📊 Struktura projektu:"
-	@echo "Strony: $$(ls page/ | wc -l)"
-	@echo "Moduły: $$(ls module/ | wc -l)"
-	@find page -name "*.js" | wc -l | xargs echo "Pliki JS:"
-	@find page -name "*.py" | wc -l | xargs echo "Pliki PY:"
-
-# Nowa strona
-new-page:
-	@read -p "Nazwa strony: " name; \
-	mkdir -p page/$$name/{js,py}/0.1.0; \
-	cp templates/page-js/* page/$$name/js/0.1.0/; \
-	cp templates/page-py/* page/$$name/py/0.1.0/; \
-	echo "✅ Utworzono: page/$$name"
-
-# Nowy moduł  
-new-module:
-	@read -p "Nazwa modułu: " name; \
-	@read -p "Technologie (js/py/both): " tech; \
-	if [ "$$tech" = "both" ]; then \
-		mkdir -p module/$$name/{js,py}/0.1.0; \
-	else \
-		mkdir -p module/$$name/$$tech/0.1.0; \
-	fi; \
-	echo "✅ Utworzono: module/$$name"
+# Zarządzanie
+stop-all:                    # Zatrzymaj wszystkie usługi
+clean-all:                   # Wyczyść artefakty
 ```
 
 ## ✅ Zalety tej struktury

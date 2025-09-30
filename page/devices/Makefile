@@ -66,3 +66,31 @@ docker-test: docker-up
 	@curl -f http://localhost:8227/ || echo "[ERROR] Frontend accessibility failed"
 	@echo "[DOCKER-TEST] Docker test completed"
 
+
+# Health check for root-level health-check-all
+.PHONY: test-health
+test-health: ## Health check for devices (backend 8207, frontend 8227)
+	@echo "[HEALTH] Checking devices backend (8207) and frontend (8227)..."
+	@curl -s -f http://localhost:8207/health >/dev/null && echo "  ✓ Backend healthy" || echo "  ✗ Backend not healthy"
+	@curl -s -f http://localhost:8227/ >/dev/null && echo "  ✓ Frontend reachable" || echo "  ✗ Frontend not reachable"
+
+# E2E testing using scripts/*
+.PHONY: e2e e2e-puppeteer
+e2e: ## Run devices E2E (starts Docker, runs scripts/test_devices_page.py, then stops)
+	@echo "[E2E] Starting devices containers..."
+	@cd docker/$(VERSION) && docker-compose up -d
+	@sleep 5
+	@echo "[E2E] Running scripts/test_devices_page.py..."
+	@python3 ../../scripts/test_devices_page.py || (echo "[E2E] devices E2E failed" && exit 1)
+	@echo "[E2E] Stopping devices containers..."
+	@cd docker/$(VERSION) && docker-compose down
+
+e2e-puppeteer: ## Run Puppeteer E2E (headless browser)
+	@echo "[E2E-PUPPETEER] Building and starting backend/frontend..."
+	@cd docker/$(VERSION) && docker-compose up -d devices-backend devices-frontend
+	@sleep 5
+	@echo "[E2E-PUPPETEER] Running Puppeteer test container..."
+	@cd docker/$(VERSION) && docker-compose run --rm maskservice-devices-puppeteer || (echo "[E2E-PUPPETEER] Failed" && exit 1)
+	@echo "[E2E-PUPPETEER] Shutting down containers..."
+	@cd docker/$(VERSION) && docker-compose down
+

@@ -1,0 +1,16 @@
+/* Devices Page Styles (external file)
+   Note: Core styles are injected by devices.js via injectStyles().
+   This file exists to satisfy static serving and avoid MIME type issues.
+*/
+
+/* Minimal baseline to ensure predictable rendering */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #f7f9fc;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#app {
+  min-height: 100vh;
+}

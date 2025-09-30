@@ -77,7 +77,6 @@ async function testMaskServiceDevices() {
             const hasCustomCSS = document.querySelector(`link[href*="devices"]`) !== null;
             const bodyContent = document.body.innerHTML.length;
             const vueAppContent = document.querySelector('#app')?.innerHTML.length || 0;
-            const vueAppContent = document.querySelector('#app')?.innerHTML.length || 0;
             
             return {
                 title,
@@ -86,7 +85,6 @@ async function testMaskServiceDevices() {
                 hasCustomScript,
                 hasCustomCSS,
                 bodyContentLength: bodyContent,
-                vueAppContentLength: vueAppContent,
                 vueAppContentLength: vueAppContent,
                 htmlStructure: document.documentElement.outerHTML.substring(0, 500)
             };
@@ -99,7 +97,6 @@ async function testMaskServiceDevices() {
         console.log(`  Custom devices.js: ${htmlAnalysis.hasCustomScript ? '✅' : '❌'}`);
         console.log(`  Custom devices.css: ${htmlAnalysis.hasCustomCSS ? '✅' : '❌'}`);
         console.log(`  Body Content Length: ${htmlAnalysis.bodyContentLength} chars`);
-        console.log(`  Vue App Content Length: ${htmlAnalysis.vueAppContentLength} chars`);
         console.log(`  Vue App Content Length: ${htmlAnalysis.vueAppContentLength} chars`);
         
         // Take screenshot for debugging

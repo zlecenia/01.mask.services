@@ -15,7 +15,7 @@ def test_devices_backend():
     
     try:
         # Test health endpoint
-        response = requests.get('http://localhost:8107/health', timeout=5)
+        response = requests.get('http://localhost:8207/health', timeout=5)
         if response.status_code == 200:
             data = response.json()
             print(f"✅ Health check: {data}")
@@ -24,7 +24,7 @@ def test_devices_backend():
             return False
             
         # Test root endpoint
-        response = requests.get('http://localhost:8107/', timeout=5)
+        response = requests.get('http://localhost:8207/', timeout=5)
         if response.status_code == 200:
             data = response.json()
             print(f"✅ Root endpoint: {data}")
@@ -81,7 +81,7 @@ def main():
     if backend_ok and frontend_ok:
         print("\n🎉 Devices page is fully functional!")
         print("🌐 Access at: http://localhost:8207")
-        print("🔧 API at: http://localhost:8107")
+        print("🔧 API at: http://localhost:8207")
         return 0
     else:
         print("\n⚠️ Some issues detected with devices page")
