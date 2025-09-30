@@ -21,6 +21,29 @@ services:
     container_name: maskservice-dashboard-frontend
     ports:
       - "8222:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
     depends_on:
       dashboard-backend:
         condition: service_healthy
+
+  # Advanced Frontend Testing Service
+  dashboard-frontend-tester:
+    image: node:18-alpine
+    container_name: maskservice-dashboard-frontend-tester
+    working_dir: /app
+    volumes:
+      - ./test-frontend.js:/app/test-frontend.js
+    command: >
+      sh -c "
+        npm install -g puppeteer &&
+        node test-frontend.js http://dashboard-frontend:80/
+      "
+    depends_on:
+      dashboard-frontend:
+        condition: service_healthy
+    profiles:
+      - testing

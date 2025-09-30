@@ -21,6 +21,29 @@ services:
     container_name: maskservice-devices-frontend
     ports:
       - "8227:80"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
     depends_on:
       devices-backend:
         condition: service_healthy
+
+  # Advanced Frontend Testing Service
+  devices-frontend-tester:
+    image: node:18-alpine
+    container_name: maskservice-devices-frontend-tester
+    working_dir: /app
+    volumes:
+      - ./test-frontend.js:/app/test-frontend.js
+    command: >
+      sh -c "
+        npm install -g puppeteer &&
+        node test-frontend.js http://devices-frontend:80/
+      "
+    depends_on:
+      devices-frontend:
+        condition: service_healthy
+    profiles:
+      - testing
